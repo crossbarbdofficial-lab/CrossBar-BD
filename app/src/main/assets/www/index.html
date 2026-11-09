@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Local Bundled html2canvas for 100% offline support with CDN fallback -->
 <script src="js/html2canvas.min.js"></script>
 <script>
@@ -34,52 +34,64 @@ if (typeof firebase === 'undefined') {
 <meta name="theme-color" content="#0a0f1e">
 <style>
 :root{
-  --bg:#f5f6f8;--c:#fff;--t:#14171a;--m:#6b7280;--b:#e5e7eb;--a:#16a34a;--r:#dc2626;--pos:#16a34a;--neg:#dc2626;--btnTxt:#fff;
+  --bg:#f6f8fa;--c:#ffffff;--t:#0f172a;--m:#64748b;--b:#e2e8f0;--a:#10b981;--r:#ef4444;--pos:#10b981;--neg:#ef4444;--btnTxt:#ffffff;
   /* Specific Status Color Variables */
   --st-pre-bg:#fef9c3;--st-pre-text:#854d0e;--st-pre-border:#facc15;
   --st-conf-bg:#dcfce7;--st-conf-text:#15803d;--st-conf-border:#22c55e;
   --st-delv-bg:#dbeafe;--st-delv-text:#1d4ed8;--st-delv-border:#3b82f6;
-  --st-canc-bg:#f3f4f6;--st-canc-text:#4b5563;--st-canc-border:#9ca3af;
+  --st-canc-bg:#f1f5f9;--st-canc-text:#475569;--st-canc-border:#cbd5e1;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
 }
 @media(prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0f1214;--c:#1a1e22;--t:#eef0f2;--m:#9aa3ad;--b:#2b3137;
-    --st-pre-bg:rgba(234,179,8,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(234,179,8,0.55);
-    --st-conf-bg:rgba(34,197,94,0.22);--st-conf-text:#4ade80;--st-conf-border:rgba(34,197,94,0.55);
-    --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
-    --st-canc-bg:rgba(156,163,175,0.2);--st-canc-text:#9ca3af;--st-canc-border:rgba(156,163,175,0.4);
+    --bg:#090d14;--c:#111827;--t:#f8fafc;--m:#94a3b8;--b:#1f2937;--a:#10b981;--pos:#10b981;--neg:#ef4444;--btnTxt:#ffffff;
+    --st-pre-bg:rgba(234,179,8,0.2);--st-pre-text:#fef08a;--st-pre-border:rgba(234,179,8,0.45);
+    --st-conf-bg:rgba(16,185,129,0.18);--st-conf-text:#6ee7b7;--st-conf-border:rgba(16,185,129,0.45);
+    --st-delv-bg:rgba(59,130,246,0.18);--st-delv-text:#93c5fd;--st-delv-border:rgba(59,130,246,0.45);
+    --st-canc-bg:rgba(148,163,184,0.15);--st-canc-text:#94a3b8;--st-canc-border:rgba(148,163,184,0.3);
   }
 }
 :root[data-theme="light"]{
-  --bg:#f5f6f8;--c:#fff;--t:#14171a;--m:#6b7280;--b:#e5e7eb;--a:#16a34a;--r:#dc2626;--pos:#16a34a;--neg:#dc2626;--btnTxt:#fff;
+  --bg:#f6f8fa;--c:#ffffff;--t:#0f172a;--m:#64748b;--b:#e2e8f0;--a:#10b981;--r:#ef4444;--pos:#10b981;--neg:#ef4444;--btnTxt:#ffffff;
   --st-pre-bg:#fef9c3;--st-pre-text:#854d0e;--st-pre-border:#facc15;
   --st-conf-bg:#dcfce7;--st-conf-text:#15803d;--st-conf-border:#22c55e;
   --st-delv-bg:#dbeafe;--st-delv-text:#1d4ed8;--st-delv-border:#3b82f6;
-  --st-canc-bg:#f3f4f6;--st-canc-text:#4b5563;--st-canc-border:#9ca3af;
+  --st-canc-bg:#f1f5f9;--st-canc-text:#475569;--st-canc-border:#cbd5e1;
 }
 :root[data-theme="dark"]{
-  --bg:#0f1214;--c:#1a1e22;--t:#eef0f2;--m:#9aa3ad;--b:#2b3137;--a:#22c55e;--btnTxt:#fff;
-  --st-pre-bg:rgba(234,179,8,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(234,179,8,0.55);
-  --st-conf-bg:rgba(34,197,94,0.22);--st-conf-text:#4ade80;--st-conf-border:rgba(34,197,94,0.55);
-  --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
-  --st-canc-bg:rgba(156,163,175,0.2);--st-canc-text:#9ca3af;--st-canc-border:rgba(156,163,175,0.4);
+  --bg:#090d14;--c:#111827;--t:#f8fafc;--m:#94a3b8;--b:#1f2937;--a:#10b981;--pos:#10b981;--neg:#ef4444;--btnTxt:#ffffff;
+  --st-pre-bg:rgba(234,179,8,0.2);--st-pre-text:#fef08a;--st-pre-border:rgba(234,179,8,0.45);
+  --st-conf-bg:rgba(16,185,129,0.18);--st-conf-text:#6ee7b7;--st-conf-border:rgba(16,185,129,0.45);
+  --st-delv-bg:rgba(59,130,246,0.18);--st-delv-text:#93c5fd;--st-delv-border:rgba(59,130,246,0.45);
+  --st-canc-bg:rgba(148,163,184,0.15);--st-canc-text:#94a3b8;--st-canc-border:rgba(148,163,184,0.3);
 }
 :root[data-theme="stadium"]{
-  --bg:#0a0f1e;--c:#121b30;--t:#f3f6ff;--m:#8892b0;--b:#23304d;--a:#f2b705;--btnTxt:#0a0f1e;--pos:#22e07a;--neg:#ff5470;
-  --st-pre-bg:rgba(242,183,5,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(242,183,5,0.55);
-  --st-conf-bg:rgba(34,224,122,0.22);--st-conf-text:#22e07a;--st-conf-border:rgba(34,224,122,0.55);
-  --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
-  --st-canc-bg:rgba(136,146,176,0.2);--st-canc-text:#8892b0;--st-canc-border:rgba(136,146,176,0.4);
+  --bg:#070b16;--c:#0f172a;--t:#f8fafc;--m:#94a3b8;--b:#1e293b;--a:#f59e0b;--btnTxt:#070b16;--pos:#10b981;--neg:#f43f5e;
+  --st-pre-bg:rgba(245,158,11,0.22);--st-pre-text:#fde68a;--st-pre-border:rgba(245,158,11,0.5);
+  --st-conf-bg:rgba(16,185,129,0.2);--st-conf-text:#6ee7b7;--st-conf-border:rgba(16,185,129,0.5);
+  --st-delv-bg:rgba(59,130,246,0.2);--st-delv-text:#93c5fd;--st-delv-border:rgba(59,130,246,0.5);
+  --st-canc-bg:rgba(148,163,184,0.15);--st-canc-text:#94a3b8;--st-canc-border:rgba(148,163,184,0.3);
 }
-:root[data-theme="stadium"] body{background-image:radial-gradient(circle at 15% 0%,rgba(242,183,5,.06),transparent 40%),radial-gradient(circle at 100% 100%,rgba(34,224,122,.05),transparent 45%)}
+:root[data-theme="stadium"] body{background-image:radial-gradient(circle at 15% 0%,rgba(245,158,11,.07),transparent 40%),radial-gradient(circle at 100% 100%,rgba(16,185,129,.06),transparent 45%)}
 :root[data-theme="stadium"] .card,:root[data-theme="stadium"] .hl{background:linear-gradient(180deg,var(--c),rgba(255,255,255,.015))}
 :root[data-theme="stadium"] h1{position:relative;padding-bottom:10px}
-:root[data-theme="stadium"] h1::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(45deg,var(--a) 0 8px,transparent 8px 16px);opacity:.6;border-radius:3px}
-:root[data-theme="stadium"] nav{background:linear-gradient(180deg,rgba(18,27,48,.95),var(--c))}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:640px;margin:auto;padding:12px 12px 90px;min-height:100vh}
-h1{font-size:18px;margin:4px 0 10px}h2{font-size:15px;margin:14px 0 6px}.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:12px;margin-bottom:10px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.k{font-size:12px;color:var(--m)}.v{font-size:20px;font-weight:700}
+:root[data-theme="stadium"] h1::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(45deg,var(--a) 0 8px,transparent 8px 16px);opacity:.7;border-radius:3px}
+:root[data-theme="stadium"] nav{background:linear-gradient(180deg,rgba(15,23,42,.96),var(--c))}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--t);
+  font:14.5px/1.5 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing:-0.01em;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  max-width:640px;margin:auto;padding:12px 12px 90px;min-height:100vh
+}
+h1{font-size:18px;margin:4px 0 10px;font-weight:800;letter-spacing:-0.02em}
+h2{font-size:15px;margin:14px 0 6px;font-weight:700;letter-spacing:-0.01em}
+.card{background:var(--c);border:1px solid var(--b);border-radius:13px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k{font-size:11.5px;color:var(--m);font-weight:600}
+.v{font-size:20px;font-weight:800;font-feature-settings:'tnum' 1;letter-spacing:-0.02em}
 input,select,button{font:inherit;padding:9px;border-radius:8px;border:1px solid var(--b);background:var(--c);color:var(--t);width:100%}
 button{background:var(--a);color:var(--btnTxt);border:0;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}button.s{background:var(--b);color:var(--t);width:auto;padding:6px 11px}button.d{background:var(--neg);color:#fff;width:auto;padding:6px 11px}
 .f{display:grid;gap:6px;margin-bottom:8px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--b)}
@@ -134,7 +146,7 @@ nav button{background:none;color:var(--m);border-radius:0;padding:12px 0;font-si
     </span>
   </h1>
   <div style="display:flex;gap:6px;align-items:center">
-    <button id="pwaInstallBtn" onclick="installPwa()" type="button" class="s" style="display:none;padding:6px 10px;font-size:12px;border-radius:8px;background:var(--a);color:var(--btnTxt)" title="Install CrossBar App">📲 Install</button>
+    <button id="headerPwaInstallBtn" onclick="installPWA()" type="button" class="s" style="display:none;padding:6px 10px;font-size:12px;border-radius:8px;background:var(--a);color:var(--btnTxt)" title="Install CrossBar App">📲 Install</button>
     <button id="cloudBtn" onclick="openCloudModal()" type="button" class="s" style="padding:6px 10px;font-size:12px;border-radius:8px" title="Cloud & Firebase Sync">☁️ Cloud</button>
     <button id="thb" onclick="cycleTheme()" type="button" style="flex:none;width:auto;padding:8px 12px;font-size:15px;position:relative;z-index:5" title="Switch Theme">🎨</button>
   </div>
@@ -211,6 +223,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   const pwaBtn = document.getElementById('pwaInstallBtn');
   if (pwaBtn) pwaBtn.style.display = 'block';
+  const headerBtn = document.getElementById('headerPwaInstallBtn');
+  if (headerBtn) headerBtn.style.display = 'inline-block';
 });
 
 async function installPWA() {
@@ -221,10 +235,13 @@ async function installPWA() {
     deferredPrompt = null;
     const pwaBtn = document.getElementById('pwaInstallBtn');
     if (pwaBtn) pwaBtn.style.display = 'none';
+    const headerBtn = document.getElementById('headerPwaInstallBtn');
+    if (headerBtn) headerBtn.style.display = 'none';
   } else {
-    toast("Tap Chrome menu (⋮) > 'Install app' or 'Add to Home screen'");
+    toast("To install: Open Chrome menu (⋮) > Tap 'Install app' or 'Add to Home screen'");
   }
 }
+window.installPwa = window.installPWA = installPWA;
 
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
@@ -243,29 +260,32 @@ function cycleTheme(){
   const n=o[(o.indexOf(cur)+1)%o.length];
   localStorage.setItem("cbdTheme",n);
   applyTheme();
+  toast(n=="stadium"?"🏆 Stadium Night theme activated":n=="dark"?"🌙 Dark Mode activated":"☀️ Clean Light mode activated");
 }
 function applyTheme(){
   const t=localStorage.getItem("cbdTheme")||"";
   document.documentElement.setAttribute("data-theme",t||"auto");
-  if($("thb")) $("thb").textContent=t=="stadium"?"🏆":t=="dark"?"🌙":"🎨";
+  if($("thb")) $("thb").textContent=t=="stadium"?"🏆":t=="dark"?"🌙":"☀️";
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if(metaTheme) metaTheme.setAttribute("content", t=="stadium"?"#0a0f1e":t=="dark"?"#0f1214":"#f5f6f8");
+  if(metaTheme) metaTheme.setAttribute("content", t=="stadium"?"#070b16":t=="dark"?"#090d14":"#f6f8fa");
 }
 
 const TABS=[["dash","Dashboard"],["ord","Orders"],["cust","Customers"],["stk","Stock"],["sum","Overview"],["due","Due"],["pro","Profit"],["ads","Ads"]];
 const SZ=["S","M","L","XL","2XL"], SL=["Half","Full"], KP={Player:[1150,1250],Retro:[1250,1350],Fan:[800,800]}, EX=["Courier","Other"];
-let S={products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0},monthlyGoal:50000,histImported:false}, tab="dash", doc=null, fbDb=null, fbAuth=null, curUser=null, ed=null, dirty=false, stq="", stf="all", cart=[], lastMeta={area:"Dhaka",odl:80,ocr:80}, cinfo={name:"",phone:"",addr:"",ref:"",notes:""};
+let S={products:[],orders:[],ads:[],exp:[],recurringExp:[],pkg:{t:0,q:0},monthlyGoal:50000,histImported:false}, tab="dash", doc=null, fbDb=null, fbAuth=null, curUser=null, ed=null, dirty=false, stq="", stf="all", cart=[], lastMeta={area:"Dhaka",odl:80,ocr:80}, cinfo={name:"",phone:"",addr:"",ref:"",notes:""};
 let ordStFilter = "all", ordDateFrom = "", ordDateTo = "", ordSearch = "";
 const so=new Set();
 
 function getFilteredOrders(){
-  return S.orders.filter(o => {
+  return (S.orders || []).filter(o => {
+    if (!o) return false;
     if (ordStFilter !== "all" && o.status !== ordStFilter) return false;
-    if (ordDateFrom && o.date < ordDateFrom) return false;
-    if (ordDateTo && o.date > ordDateTo) return false;
+    if (ordDateFrom && o.date && o.date < ordDateFrom) return false;
+    if (ordDateTo && o.date && o.date > ordDateTo) return false;
     if (ordSearch) {
       const q = ordSearch.trim().toLowerCase();
-      const text = (o.name + " " + (o.phone||"") + " " + (o.addr||"") + " " + (o.ref||"") + " " + (o.notes||"") + " " + o.items.map(i => i.name + " " + i.slv + " " + i.size).join(" ")).toLowerCase();
+      const itemsText = Array.isArray(o.items) ? o.items.map(i => (i.name||"") + " " + (i.slv||"") + " " + (i.size||"")).join(" ") : "";
+      const text = ((o.name||"") + " " + (o.phone||"") + " " + (o.addr||"") + " " + (o.ref||"") + " " + (o.notes||"") + " " + itemsText).toLowerCase();
       if (!text.includes(q)) return false;
     }
     return true;
@@ -275,13 +295,19 @@ function setOrdFilter(st){ ordStFilter = st; render(); }
 function setOrdDateFrom(val){ ordDateFrom = val; render(); }
 function setOrdDateTo(val){ ordDateTo = val; render(); }
 function setOrdQuickDate(type){
+  const t = today();
   if (type === 'today') {
-    ordDateFrom = ordDateTo = today();
+    ordDateFrom = ordDateTo = t;
   } else if (type === '7days') {
     const d = new Date(); d.setDate(d.getDate() - 6);
-    ordDateFrom = d.toISOString().slice(0,10); ordDateTo = today();
+    const yr = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    ordDateFrom = `${yr}-${mo}-${da}`;
+    ordDateTo = t;
   } else if (type === 'month') {
-    ordDateFrom = today().slice(0,7) + "-01"; ordDateTo = today();
+    ordDateFrom = t.slice(0,7) + "-01";
+    ordDateTo = t;
   } else if (type === 'clear') {
     ordDateFrom = ""; ordDateTo = "";
   }
@@ -394,7 +420,7 @@ function stClass(st){
 
 function renderOrderCardHtml(o){
   const stCls = stClass(o.status);
-  return `<div class="card order-card ${stCls}"><div class="row" style="border:0;padding:0"><b>${esc(o.name)}</b><span class="tag ${stCls}">${o.status}</span></div><div class="sm">${esc(o.phone)} · ${o.date} · ${o.area}${o.pay?" · "+o.pay:""}</div><div class="sm">📍 ${esc(o.addr||"-")}</div><div>${o.items.map(i=>esc(i.name)+" · "+i.slv+(i.size?" ("+i.size+")":"")+" ×"+i.qty).join(", ")}</div><div class="sm">Delivery ${o.delivery?tk(o.delivery):"Free"}${o.discount?" · Discount "+tk(o.discount):""}</div><div>Total <b>${tk(total(o))}</b> · Paid ${tk(o.paid)}${dueOf(o)?` · <b class="low">Baki ${tk(dueOf(o))}</b>`:""}</div>${o.notes?`<div style="background:var(--bg);border-left:3px solid var(--a);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:12px">📝 <b>Note:</b> ${esc(o.notes)}</div>`:""}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${o.status=="Pre-order"?`<button class="s" onclick="setSt('${o.id}','Confirmed')">Stock arrived</button>`:""}${o.status=="Confirmed"?`<button class="s" onclick="setSt('${o.id}','Delivered')">Delivered</button>`:""}${dueOf(o)&&o.status!="Cancelled"?`<button class="s" onclick="full('${o.id}')">Full paid</button>`:""}${o.status!="Cancelled"?`<button class="s" onclick="sure(this,()=>setSt('${o.id}','Cancelled'))">Cancel</button>`:""}<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,confirmMsg(o))}">💬 Confirm</a><button class="s" onclick='copyMsg(this,${JSON.stringify(confirmMsg(o))})'>📋</button><button class="s" onclick="shareInvoice('${o.id}')">📸 Confirm + Invoice</button>${o.status=="Delivered"?`<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,reviewMsg(o))}">🌟 Review</a>`:""}<button class="s" onclick="invoice('${o.id}')">🧾 Invoice</button><button class="s" onclick="loadReorder('${o.id}')">🔁 Reorder</button><button class="s" onclick="ed='${o.id}';render()">✏️ Edit</button><button class="d" onclick="sure(this,()=>delO('${o.id}'))">×</button></div></div>`;
+  return `<div class="card order-card ${stCls}"><div class="row" style="border:0;padding:0"><b>${esc(o.name)}</b><span class="tag ${stCls}">${o.status}</span></div><div class="sm">${esc(o.phone)} · ${o.date} · ${o.area}${o.pay?" · "+o.pay:""}</div><div class="sm">📍 ${esc(o.addr||"-")}</div><div>${o.items.map(i=>esc(i.name)+" · "+i.slv+(i.size?" ("+i.size+")":"")+" ×"+i.qty).join(", ")}</div><div class="sm">Delivery ${o.delivery?tk(o.delivery):"Free"}${o.discount?" · Discount "+tk(o.discount):""}</div><div>Total <b>${tk(total(o))}</b> · Paid ${tk(o.paid)}${dueOf(o)?` · <b class="low">Baki ${tk(dueOf(o))}</b>`:""}</div>${o.notes?`<div style="background:var(--bg);border-left:3px solid var(--a);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:12px">📝 <b>Note:</b> ${esc(o.notes)}</div>`:""}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${o.status=="Pre-order"?`<button class="s" onclick="setSt('${o.id}','Confirmed')">Stock arrived</button>`:""}${o.status=="Confirmed"?`<button class="s" onclick="setSt('${o.id}','Delivered')">Delivered</button>`:""}${dueOf(o)&&o.status!="Cancelled"?`<button class="s" onclick="full('${o.id}')">Full paid</button>`:""}${o.status!="Cancelled"?`<button class="s" onclick="sure(this,()=>setSt('${o.id}','Cancelled'))">Cancel</button>`:""}<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,confirmMsg(o))}">💬 Confirm</a><button class="s" onclick="copyOrderMsg('${o.id}',this)" title="Copy confirmation message">📋</button><button class="s" onclick="shareInvoice('${o.id}')">📸 Confirm + Invoice</button>${o.status=="Delivered"?`<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,reviewMsg(o))}">🌟 Review</a>`:""}<button class="s" onclick="invoice('${o.id}')">🧾 Invoice</button><button class="s" onclick="loadReorder('${o.id}')">🔁 Reorder</button><button class="s" onclick="ed='${o.id}';render()">✏️ Edit</button><button class="d" onclick="sure(this,()=>delO('${o.id}'))">×</button></div></div>`;
 }
 
 function renderOrdList(){
@@ -462,23 +488,62 @@ function removeHist(){
 }
 
 const PAYM=["COD","bKash","Nagad","Bank"];
-const $=id=>document.getElementById(id), tk=n=>(n<0?"-":"")+"৳"+Math.abs(Math.round(n)).toLocaleString("en-IN"), uid=()=>Math.random().toString(36).slice(2,9), today=()=>new Date().toISOString().slice(0,10);
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const zs=()=>Object.fromEntries(SZ.map(z=>[z,0])), vp=(p,sl)=>SZ.reduce((a,z)=>a+(p.v[sl].sizes[z]||0),0), tot=p=>vp(p,"Half")+vp(p,"Full"), pk=()=>S.pkg&&S.pkg.q?S.pkg.t/S.pkg.q:0, unit=(p,sl)=>p.v[sl].cost+(p.vara||0)+pk();
+const $=id=>document.getElementById(id);
+const tk=n=>{
+  const num=Number(n);
+  if(isNaN(num))return "৳0";
+  return (num<0?"-":"")+"৳"+Math.abs(Math.round(num)).toLocaleString("en-IN");
+};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>{
+  const d=new Date();
+  const yr=d.getFullYear();
+  const mo=String(d.getMonth()+1).padStart(2,'0');
+  const da=String(d.getDate()).padStart(2,'0');
+  return `${yr}-${mo}-${da}`;
+};
+const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const zs=()=>Object.fromEntries(SZ.map(z=>[z,0])), vp=(p,sl)=>SZ.reduce((a,z)=>a+((p.v&&p.v[sl]&&p.v[sl].sizes)?(p.v[sl].sizes[z]||0):0),0), tot=p=>vp(p,"Half")+vp(p,"Full"), pk=()=>S.pkg&&S.pkg.q?(Number(S.pkg.t)||0)/(Number(S.pkg.q)||1):0, unit=(p,sl)=>(p.v&&p.v[sl]?(Number(p.v[sl].cost)||0):0)+(Number(p.vara)||0)+pk();
 
 const norm=()=>{
-  S.exp=S.exp||[];S.ads=S.ads||[];S.pkg=S.pkg||{t:0,q:0};S.biz=S.biz||{phone:""};S.histImported=S.histImported||false;S.refPct=S.refPct===undefined?10:S.refPct;
+  S.exp=Array.isArray(S.exp)?S.exp:[];
+  S.ads=Array.isArray(S.ads)?S.ads:[];
+  S.recurringExp=Array.isArray(S.recurringExp)?S.recurringExp:[];
+  S.recurringExp.forEach(r=>{
+    r.amt=Number(r.amt)||0;
+    r.active=r.active!==false;
+    r.cat=r.cat||"Shop Rent";
+    r.name=r.name||"Expense";
+    r.startMonth=r.startMonth||today().slice(0,7);
+  });
+  S.pkg=S.pkg||{t:0,q:0};
+  S.biz=S.biz||{phone:""};
+  S.histImported=Boolean(S.histImported);
+  S.refPct=S.refPct===undefined?10:Number(S.refPct);
+  S.monthlyGoal=Number(S.monthlyGoal)||50000;
+  S.products=Array.isArray(S.products)?S.products:[];
+  S.orders=Array.isArray(S.orders)?S.orders:[];
   S.products.forEach(p=>{
     if(!p.v){
-      const f=/full/i.test(p.type||""),o={cost:p.cost||0,price:p.price||0,sizes:p.sizes||zs()},e={cost:0,price:0,sizes:zs()};
+      const f=/full/i.test(p.type||""),o={cost:Number(p.cost)||0,price:Number(p.price)||0,sizes:p.sizes||zs()},e={cost:0,price:0,sizes:zs()};
       p.v=f?{Half:e,Full:o}:{Half:o,Full:e};delete p.sizes;delete p.cost;delete p.price;
     }
-    p.vara=p.vara||0;p.inv=p.inv||0;
+    p.vara=Number(p.vara)||0;p.inv=Number(p.inv)||0;
   });
-  S.orders.forEach(o=>o.items.forEach(i=>{i.cost=i.cost||0;i.slv=i.slv||"Half"}));
+  S.orders.forEach(o=>{
+    if(!Array.isArray(o.items)) o.items=[];
+    o.delivery=Number(o.delivery)||0;
+    o.courier=Number(o.courier)||0;
+    o.discount=Number(o.discount)||0;
+    o.paid=Number(o.paid)||0;
+    o.items.forEach(i=>{i.cost=Number(i.cost)||0;i.slv=i.slv||"Half"});
+  });
 };
 
-const irev=o=>o.items.reduce((a,i)=>a+i.qty*i.price,0)-(o.discount||0), cogs=o=>o.items.reduce((a,i)=>a+i.qty*i.cost,0), total=o=>irev(o)+o.delivery, dueOf=o=>Math.max(0,total(o)-o.paid);
+const irev=o=>(Array.isArray(o?.items)?o.items.reduce((a,i)=>a+(Number(i.qty)||0)*(Number(i.price)||0),0):0)-(Number(o?.discount)||0);
+const cogs=o=>(Array.isArray(o?.items)?o.items.reduce((a,i)=>a+(Number(i.qty)||0)*(Number(i.cost)||0),0):0);
+const total=o=>Math.max(0,irev(o)+(Number(o?.delivery)||0));
+const dueOf=o=>Math.max(0,total(o)-(Number(o?.paid)||0));
 
 function toast(m){
   const t=$("toast");if(!t)return;t.textContent=m;t.style.display="block";clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",2600);
@@ -732,17 +797,37 @@ function addProduct(){
   if(!pcs)return toast("Enter quantity for at least one size");
   const vt=+$("pv").value||0;
   upd(()=>S.products.push({id:uid(),name:n,team:$("ptm").value,kind:$("pk").value,vara:vt/pcs,vt,bp:pcs,inv:inv+vt,v}));
+  $("pn").value = "";
+  if($("pv")) $("pv").value = "";
+  SL.forEach(sl=>{
+    const c=sl[0];
+    SZ.forEach(z=>{
+      const el=$("s"+c+z);
+      if(el) el.value="";
+    });
+  });
   toast("Product added ✓");
 }
 
-function adj(id,sl,z,d){upd(()=>{const s=S.products.find(x=>x.id==id).v[sl].sizes;s[z]=Math.max(0,(s[z]||0)+d)})}
-function setV(id,sl,f,v){S.products.find(x=>x.id==id).v[sl][f]=+v||0;save();render();toast("Updated ✓")}
+function adj(id,sl,z,d){
+  upd(()=>{
+    const p=S.products.find(x=>x.id==id);
+    if(!p||!p.v||!p.v[sl]||!p.v[sl].sizes)return;
+    p.v[sl].sizes[z]=Math.max(0,(p.v[sl].sizes[z]||0)+d);
+  });
+}
+function setV(id,sl,f,v){
+  const p=S.products.find(x=>x.id==id);
+  if(!p||!p.v||!p.v[sl])return;
+  p.v[sl][f]=+v||0;save();render();toast("Updated ✓");
+}
 function delP(id){upd(()=>S.products=S.products.filter(x=>x.id!=id))}
 function savePkg(){upd(()=>S.pkg={t:+$("pkT").value||0,q:+$("pkQ").value||0});toast("Packaging updated ✓")}
 function saveBiz(){upd(()=>S.biz={phone:$("bph").value.trim()});toast("Business info saved ✓")}
 function areaCh(){$("odl").value=$("ocr").value=$("oa").value=="Dhaka"?80:140}
 function cartHave(pid,sl,z){
-  const p=S.products.find(x=>x.id==pid),base=p?(p.v[sl].sizes[z]||0):0;
+  const p=S.products.find(x=>x.id==pid);
+  const base=(p&&p.v&&p.v[sl]&&p.v[sl].sizes)?(p.v[sl].sizes[z]||0):0;
   const used=cart.filter(c=>c.pid==pid&&c.slv==sl&&c.size==z).reduce((a,c)=>a+c.qty,0);
   return base-used;
 }
@@ -756,7 +841,9 @@ function addToCart(){
 }
 function rmCart(idx){cart.splice(idx,1);render()}
 function loadReorder(id){
-  const o=S.orders.find(x=>x.id==id);cart=o.items.map(c=>({...c}));cinfo={name:o.name,phone:o.phone,addr:o.addr||"",ref:"",notes:o.notes||""};tab="ord";render();scrollTo(0,0);toast("Items loaded — adjust and Create Order");
+  const o=S.orders.find(x=>x.id==id);
+  if(!o||!Array.isArray(o.items))return toast("Order not found");
+  cart=o.items.map(c=>({...c}));cinfo={name:o.name||"",phone:o.phone||"",addr:o.addr||"",ref:"",notes:o.notes||""};tab="ord";render();scrollTo(0,0);toast("Items loaded — adjust and Create Order");
 }
 function addOrder(){
   const n=$("on").value.trim();if(!cart.length)return toast("Add at least one item first");if(!n)return toast("Enter customer name");
@@ -780,23 +867,66 @@ function addOrder(){
 function setSt(id,st){
   upd(()=>{
     const o=S.orders.find(x=>x.id==id);
-    const mv=s=>o.items.forEach(i=>{const p=S.products.find(x=>x.id==i.pid);if(p&&i.size){const z=p.v[i.slv].sizes;z[i.size]=Math.max(0,(z[i.size]||0)+s*i.qty)}});
-    if(o.status=="Pre-order"&&st=="Confirmed")mv(-1);
-    if(st=="Cancelled"&&o.status!="Pre-order"&&o.status!="Cancelled")mv(1);
+    if(!o) return;
+    const mv=s=>o.items.forEach(i=>{
+      const p=S.products.find(x=>x.id==i.pid);
+      if(p&&i.size&&p.v&&p.v[i.slv]&&p.v[i.slv].sizes){
+        const z=p.v[i.slv].sizes;
+        z[i.size]=Math.max(0,(z[i.size]||0)+s*i.qty);
+      }
+    });
+    const wasActive = (o.status === "Confirmed" || o.status === "Delivered");
+    const willBeActive = (st === "Confirmed" || st === "Delivered");
+    if(!wasActive && willBeActive) mv(-1); // Transition to active order -> deduct stock
+    if(wasActive && !willBeActive) mv(1);  // Transition to Cancelled/Pre-order -> restore stock
     o.status=st;
   });
 }
-function full(id){upd(()=>{const o=S.orders.find(x=>x.id==id);o.paid=total(o)})}
+function full(id){upd(()=>{const o=S.orders.find(x=>x.id==id);if(o)o.paid=total(o)})}
 function payIn(id){
-  const v=+$("pay"+id).value;if(!v)return toast("Enter amount");
-  upd(()=>{S.orders.find(x=>x.id==id).paid+=v});toast("Payment recorded ✓");
+  const el = $("pay"+id);
+  if(!el) return;
+  const v=+el.value;
+  if(!v || v<=0) return toast("Enter a valid payment amount");
+  upd(()=>{
+    const o=S.orders.find(x=>x.id==id);
+    if(o) o.paid=(Number(o.paid)||0)+v;
+  });
+  el.value="";
+  toast("Payment recorded ✓");
 }
-const mvS=(o,d)=>o.items.forEach(i=>{const p=S.products.find(x=>x.id==i.pid);if(p&&i.size){const z=p.v[i.slv].sizes;z[i.size]=Math.max(0,(z[i.size]||0)+d*i.qty)}});
+const mvS=(o,d)=>{
+  if(!o || !Array.isArray(o.items)) return;
+  o.items.forEach(i=>{
+    const p=S.products.find(x=>x.id==i.pid);
+    if(p&&i.size&&p.v&&p.v[i.slv]&&p.v[i.slv].sizes){
+      const z=p.v[i.slv].sizes;
+      z[i.size]=Math.max(0,(z[i.size]||0)+d*i.qty);
+    }
+  });
+};
 function delO(id){
-  upd(()=>{const o=S.orders.find(x=>x.id==id);if(o&&o.status=="Confirmed")mvS(o,1);S.orders=S.orders.filter(x=>x.id!=id)});
+  upd(()=>{
+    const o=S.orders.find(x=>x.id==id);
+    if(o && (o.status=="Confirmed" || o.status=="Delivered")) mvS(o,1);
+    S.orders=S.orders.filter(x=>x.id!=id);
+  });
+  toast("Order deleted ✓");
 }
-function waPhone(ph){return "88"+String(ph).replace(/\D/g,"").replace(/^88/,"")}
-function waLink(ph,msg){return "https://api.whatsapp.com/send/?phone="+waPhone(ph)+"&text="+encodeURIComponent(msg)+"&type=phone_number&app_absent=0"}
+function waPhone(ph){
+  if(!ph) return "";
+  const clean = String(ph).replace(/\D/g,"");
+  if(!clean) return "";
+  if(clean.startsWith("880")) return clean;
+  if(clean.startsWith("0")) return "88" + clean;
+  if(clean.startsWith("88")) return clean;
+  return "880" + clean;
+}
+function waLink(ph,msg){
+  const clean = waPhone(ph);
+  if(!clean) return "javascript:toast('No phone number entered for this customer')";
+  return "https://api.whatsapp.com/send/?phone="+clean+"&text="+encodeURIComponent(msg)+"&type=phone_number&app_absent=0";
+}
 async function copyMsg(btn,text){
   try{
     if(window.AndroidBridge && window.AndroidBridge.copyToClipboard){
@@ -807,11 +937,23 @@ async function copyMsg(btn,text){
     toast("Message copied — paste it in WhatsApp ✓");
   }catch(e){toast("Couldn't copy")}
 }
-function reviewMsg(o){return "Assalamu alaikum "+o.name+"! Thanks for shopping with CrossBar BD. We'd love a quick review or a photo in your new jersey — it really helps our small business grow. Reply here whenever you get a chance. Thank you! 🙏"}
+function copyOrderMsg(id, btn){
+  const o=S.orders.find(x=>x.id==id);
+  if(!o) return;
+  copyMsg(btn, confirmMsg(o));
+}
+function copyDueMsg(id, btn){
+  const o=S.orders.find(x=>x.id==id);
+  if(!o) return;
+  const msg="Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support! 🙏";
+  copyMsg(btn, msg);
+}
+function reviewMsg(o){return "Assalamu alaikum "+(o?.name||"")+"! Thanks for shopping with CrossBar BD. We'd love a quick review or a photo in your new jersey — it really helps our small business grow. Reply here whenever you get a chance. Thank you! 🙏"}
 function confirmMsg(o){
-  const lines=o.items.map(i=>"- "+i.name+" ("+i.slv+", "+i.size+") x"+i.qty).join("\n");
+  if(!o) return "";
+  const lines=(Array.isArray(o.items)?o.items:[]).map(i=>"- "+(i.name||"")+" ("+(i.slv||"")+", "+(i.size||"")+") x"+(i.qty||1)).join("\n");
   const notePart = o.notes ? "\nNote: " + o.notes : "";
-  return "Assalamu alaikum "+o.name+"! Your order from CrossBar BD is confirmed:\n\n"+lines+"\nTotal: "+tk(total(o))+"\nDelivery area: "+o.area+(o.addr?" - "+o.addr:"")+notePart+"\n\nThank you for choosing CrossBar BD!";
+  return "Assalamu alaikum "+(o.name||"")+"! Your order from CrossBar BD is confirmed:\n\n"+lines+"\nTotal: "+tk(total(o))+"\nDelivery area: "+(o.area||"")+(o.addr?" - "+o.addr:"")+notePart+"\n\nThank you for choosing CrossBar BD!";
 }
 
 // Bulk WhatsApp Messaging
@@ -1038,9 +1180,16 @@ async function shareInvoice(id){
 function saveEd(id){
   upd(()=>{
     const o=S.orders.find(x=>x.id==id);
-    o.name=$("xn").value.trim()||o.name;o.phone=$("xph").value.trim();o.area=$("xar").value;o.addr=$("xad").value.trim();
-    if(o.items.length==1)o.items[0].price=+$("xpr").value||0;
-    o.delivery=+$("xdl").value||0;o.courier=+$("xcr").value||0;o.discount=+$("xdi").value||0;o.paid=+$("xpd").value||0;
+    if(!o) return;
+    if($("xn")) o.name=$("xn").value.trim()||o.name;
+    if($("xph")) o.phone=$("xph").value.trim();
+    if($("xar")) o.area=$("xar").value;
+    if($("xad")) o.addr=$("xad").value.trim();
+    if(o.items && o.items.length==1 && $("xpr")) o.items[0].price=+$("xpr").value||0;
+    if($("xdl")) o.delivery=+$("xdl").value||0;
+    if($("xcr")) o.courier=+$("xcr").value||0;
+    if($("xdi")) o.discount=+$("xdi").value||0;
+    if($("xpd")) o.paid=+$("xpd").value||0;
     o.notes=$("xnt")?$("xnt").value.trim():(o.notes||"");
     ed=null;
   });
@@ -1064,7 +1213,7 @@ const R=(l,v,cl)=>`<div class="row"><span>${l}</span><b class="${cl||""}">${v}</
 function bkp(){saveFile("crossbar-backup-"+today()+".json",JSON.stringify(S),"application/json");toast("Preparing backup file")}
 function rst(inp){
   const f=inp.files[0];if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.products||!d.orders)throw 0;upd(()=>{S=Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0}},d)});toast("Data restored ✓")}catch(e){toast("Invalid file")}};
+  rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.products||!d.orders)throw 0;upd(()=>{S=Object.assign({products:[],orders:[],ads:[],exp:[],recurringExp:[],pkg:{t:0,q:0}},d)});toast("Data restored ✓")}catch(e){toast("Invalid file")}};
   rd.readAsText(f);
 }
 
@@ -1106,7 +1255,7 @@ async function pull(){
   try{
     const r2=await doc.get();if(dirty||!r2.exists)return;
     const prev=S,old=JSON.stringify(S);
-    S=Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0}},JSON.parse(JSON.stringify(r2.data())));
+    S=Object.assign({products:[],orders:[],ads:[],exp:[],recurringExp:[],pkg:{t:0,q:0}},JSON.parse(JSON.stringify(r2.data())));
     norm();
     if(dirty){S=prev;return}
     if(JSON.stringify(S)!==old){render();toast("Synced latest data from cloud ✓")}else S=prev;
@@ -1132,9 +1281,87 @@ function saveMonthlyGoal(){
 }
 function tabs(){$("nav").innerHTML=TABS.map(([k,l])=>`<button class="${tab==k?"on":""}" onclick="tab='${k}';render();scrollTo(0,0)">${l}</button>`).join("")}
 
+// Recurring Monthly Expenses Logic (Shop Rent, Utilities, WiFi, Salary)
+function getOperatingMonths(){
+  const set = new Set();
+  const curM = today().slice(0, 7);
+  set.add(curM);
+  (S.orders || []).forEach(o => { if (o && o.date) set.add(o.date.slice(0, 7)); });
+  (S.ads || []).forEach(a => { if (a && a.date) set.add(a.date.slice(0, 7)); });
+  (S.exp || []).forEach(e => { if (e && e.date) set.add(e.date.slice(0, 7)); });
+  (S.recurringExp || []).forEach(r => { if (r && r.startMonth && r.startMonth <= curM) set.add(r.startMonth); });
+  return Array.from(set).sort();
+}
+
+function recurringExpenseForMonth(monthKey){
+  if (!monthKey) return 0;
+  return (S.recurringExp || [])
+    .filter(r => r.active !== false && (!r.startMonth || r.startMonth <= monthKey))
+    .reduce((sum, r) => sum + (Number(r.amt) || 0), 0);
+}
+
+function totalRecurringExpenses(){
+  const months = getOperatingMonths();
+  return months.reduce((tot, m) => tot + recurringExpenseForMonth(m), 0);
+}
+
+function addRecurringExp(){
+  const name = ($("recName")?.value || "").trim();
+  const cat = $("recCat")?.value || "Shop Rent";
+  const amt = +($("recAmt")?.value || 0);
+  const start = ($("recStart")?.value || "").trim() || today().slice(0, 7);
+  if (!name) return toast("Enter expense name (e.g. Shop Rent)");
+  if (amt <= 0) return toast("Enter monthly amount in ৳");
+  upd(() => {
+    if (!Array.isArray(S.recurringExp)) S.recurringExp = [];
+    S.recurringExp.push({
+      id: uid(),
+      name,
+      cat,
+      amt,
+      startMonth: start,
+      active: true,
+      createdAt: today()
+    });
+  });
+  toast(name + " (" + tk(amt) + "/month) added to recurring expenses ✓");
+}
+
+function delRecurringExp(id){
+  upd(() => {
+    S.recurringExp = (S.recurringExp || []).filter(r => r.id !== id);
+  });
+  toast("Recurring expense removed");
+}
+
+function toggleRecurringExp(id){
+  upd(() => {
+    const item = (S.recurringExp || []).find(r => r.id === id);
+    if (item) {
+      item.active = item.active === false ? true : false;
+    }
+  });
+  toast("Status updated ✓");
+}
+
 function calc(){
-  const live=S.orders.filter(o=>o.status!="Cancelled"),sold=live.filter(o=>o.status!="Pre-order"),sp=sold.reduce((a,o)=>a+o.items.reduce((x,i)=>x+i.qty,0),0),rev=sold.reduce((a,o)=>a+total(o),0),cg=sold.reduce((a,o)=>a+cogs(o),0),due=live.reduce((a,o)=>a+dueOf(o),0),spend=S.ads.reduce((a,x)=>a+x.spend,0),ao=S.ads.reduce((a,x)=>a+x.ords,0),am=S.ads.reduce((a,x)=>a+x.msgs,0),opx=S.exp.filter(e=>EX.includes(e.cat)).reduce((a,e)=>a+e.amt,0),courier=sold.reduce((a,o)=>a+(o.courier||0),0),adsPer=sp?spend/sp:0,net=rev-cg-opx-courier-spend,inv=S.products.reduce((a,p)=>a+SL.reduce((x,sl)=>x+vp(p,sl)*unit(p,sl),0),0),invest=S.products.reduce((a,p)=>a+p.inv,0)+S.pkg.t+opx+courier+spend;
-  return{live,sold,sp,rev,cg,due,spend,ao,am,opx,courier,adsPer,net,inv,invest};
+  const live=(S.orders||[]).filter(o=>o&&o.status!="Cancelled");
+  const sold=live.filter(o=>o.status!="Pre-order");
+  const sp=sold.reduce((a,o)=>a+(Array.isArray(o.items)?o.items.reduce((x,i)=>x+(Number(i.qty)||0),0):0),0);
+  const rev=sold.reduce((a,o)=>a+total(o),0);
+  const cg=sold.reduce((a,o)=>a+cogs(o),0);
+  const due=live.reduce((a,o)=>a+dueOf(o),0);
+  const spend=(S.ads||[]).reduce((a,x)=>a+(Number(x.spend)||0),0);
+  const ao=(S.ads||[]).reduce((a,x)=>a+(Number(x.ords)||0),0);
+  const am=(S.ads||[]).reduce((a,x)=>a+(Number(x.msgs)||0),0);
+  const opx=(S.exp||[]).filter(e=>EX.includes(e.cat)).reduce((a,e)=>a+(Number(e.amt)||0),0);
+  const courier=sold.reduce((a,o)=>a+(Number(o.courier)||0),0);
+  const adsPer=sp?spend/sp:0;
+  const recurringTot=totalRecurringExpenses();
+  const net=rev-cg-opx-courier-spend-recurringTot;
+  const inv=(S.products||[]).reduce((a,p)=>a+SL.reduce((x,sl)=>x+vp(p,sl)*unit(p,sl),0),0);
+  const invest=(S.products||[]).reduce((a,p)=>a+(Number(p.inv)||0),0)+(Number(S.pkg?.t)||0)+opx+courier+spend+recurringTot;
+  return{live,sold,sp,rev,cg,due,spend,ao,am,opx,courier,adsPer,net,inv,invest,recurringTot};
 }
 
 function vblock(p,sl){
@@ -1469,6 +1696,101 @@ ${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Cle
     const goal = (typeof S.monthlyGoal === "number" && S.monthlyGoal > 0) ? S.monthlyGoal : 50000;
     const pct = goal > 0 ? Math.round((monthRev / goal) * 100) : 0;
     const monthName = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+    const opMonths = getOperatingMonths();
+    const activeMonthlyTotal = (S.recurringExp || []).filter(r => r.active !== false).reduce((a, r) => a + (Number(r.amt) || 0), 0);
+
+    const recCardHtml = `<div class="card" style="border:1px solid var(--b)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+    <div>
+      <div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px">🏢 Fixed Recurring Monthly Expenses</div>
+      <b style="font-size:16px">Shop Rent, Utilities & Bills</b>
+      <div class="sm" style="margin-top:2px;font-size:11px">Auto-deducted from net profit every operating month</div>
+    </div>
+    <span class="tag ${activeMonthlyTotal > 0 ? 'st-conf' : 'st-canc'}" style="font-size:12px;font-weight:700">
+      ${tk(activeMonthlyTotal)}/month
+    </span>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+    <div style="background:var(--bg);padding:8px 10px;border-radius:8px">
+      <div class="k">Active Monthly Overhead</div>
+      <div class="v low" style="font-size:17px">${tk(activeMonthlyTotal)}</div>
+      <div class="sm" style="font-size:11px">${(S.recurringExp||[]).filter(r=>r.active!==false).length} active items</div>
+    </div>
+    <div style="background:var(--bg);padding:8px 10px;border-radius:8px">
+      <div class="k">Total Deducted (All Months)</div>
+      <div class="v neg" style="font-size:17px">${tk(c.recurringTot)}</div>
+      <div class="sm" style="font-size:11px">across ${opMonths.length} active month${opMonths.length>1?'s':''}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:8px">
+    ${(S.recurringExp && S.recurringExp.length) ? S.recurringExp.map(r => {
+      const isAct = r.active !== false;
+      const catIcon = r.cat.includes("Rent") ? "🏢" : r.cat.includes("Electricity") || r.cat.includes("Utility") ? "⚡" : r.cat.includes("Internet") || r.cat.includes("WiFi") ? "🌐" : r.cat.includes("Salary") ? "👤" : r.cat.includes("Software") ? "💻" : "💼";
+      return `<div style="border-top:1px solid var(--b);padding:9px 0;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px">
+            <b>${catIcon} ${esc(r.name)}</b>
+            <span class="tag ${isAct ? 'st-conf' : 'st-canc'}" style="font-size:10px;padding:2px 6px">${isAct ? 'Active' : 'Paused'}</span>
+          </div>
+          <div class="sm" style="font-size:11px;margin-top:2px">
+            <span>${esc(r.cat)}</span> · <span>Starts: <b>${esc(r.startMonth||'From start')}</b></span>
+          </div>
+        </div>
+        <div style="text-align:right;display:flex;align-items:center;gap:8px">
+          <div>
+            <b style="font-size:14px;color:${isAct?'var(--neg)':'var(--m)'}">${tk(r.amt)}</b>
+            <div class="sm" style="font-size:10px">/month</div>
+          </div>
+          <button class="s xs" style="font-size:11px;padding:4px 8px" onclick="toggleRecurringExp('${r.id}')" title="${isAct?'Pause deduction':'Resume deduction'}">
+            ${isAct ? '⏸ Pause' : '▶ Resume'}
+          </button>
+          <button class="d xs" style="font-size:12px;padding:4px 7px" onclick="sure(this,()=>delRecurringExp('${r.id}'))" title="Delete">×</button>
+        </div>
+      </div>`;
+    }).join("") : '<div class="sm" style="padding:8px 0;text-align:center;color:var(--m)">No recurring monthly expenses added yet.<br>Add shop rent, electricity, wifi or salary below.</div>'}
+  </div>
+
+  <details style="border-top:1px solid var(--b);margin-top:8px;padding-top:8px">
+    <summary style="cursor:pointer;font-weight:700;color:var(--a);font-size:13px;padding:4px 0">
+      + Add New Recurring Monthly Expense
+    </summary>
+    <div class="f" style="margin-top:8px;background:var(--bg);padding:10px;border-radius:8px">
+      <div class="grid">
+        <div>
+          <div class="k">Expense Name</div>
+          <input id="recName" placeholder="e.g. Shop Rent / WiFi" style="font-size:13px">
+        </div>
+        <div>
+          <div class="k">Category</div>
+          <select id="recCat" style="font-size:13px">
+            <option>Shop Rent</option>
+            <option>Electricity & Utilities</option>
+            <option>Internet & WiFi</option>
+            <option>Staff Salary</option>
+            <option>Software & Tools</option>
+            <option>Other Fixed Expense</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:6px">
+        <div>
+          <div class="k">Monthly Amount (৳)</div>
+          <input id="recAmt" type="number" min="0" step="100" placeholder="e.g. 5000" style="font-size:13px">
+        </div>
+        <div>
+          <div class="k">Starting Month</div>
+          <input id="recStart" type="month" value="${curMonth}" style="font-size:13px">
+        </div>
+      </div>
+      <div class="sm" style="margin:4px 0 8px;font-size:11px;color:var(--m)">
+        ℹ️ This amount will be automatically deducted from net profit for every month from the starting month onwards.
+      </div>
+      <button style="width:100%;font-size:13px;padding:8px" onclick="addRecurringExp()">Save Recurring Expense</button>
+    </div>
+  </details>
+</div>`;
 
     h=`<div class="card" style="border:1px solid var(--b);position:relative">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -1506,15 +1828,16 @@ ${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Cle
     </div>
   </div>
 </div>
+${recCardHtml}
 <div class="card"><b>📦 Current Stock</b>${R("Total Jerseys",pcs+" pcs")}${R("Buying Cost (with freight+packaging)",tk(sc))}${R("Expected Sale Value (if sold)",tk(mv))}${R("Expected Profit from Stock",tk(sp_),sp_<0?"neg":"pos")}</div>
-<div class="card"><b>💸 Total Expenses So Far</b>${R("Jersey Cost + Freight (all batches)",tk(kena))}${R("Packaging",tk(S.pkg.t))}${R("Courier / Other Expenses",tk(c.opx+c.courier))}${R("Ad Spend",tk(c.spend))}${R("<b>Total Expense (Investment)</b>",tk(c.invest))}</div>
-<div class="card"><b>💰 Sales Summary</b>${R("Sales ("+c.sp+" pcs, delivery included)",tk(c.rev))}${R("Jersey Cost",tk(c.cg))}${R("Ads + Courier + Other Expenses",tk(c.spend+c.opx+c.courier))}${R("<b>Net Profit So Far</b>",tk(c.net),c.net<0?"neg":"pos")}${R("Amount Received",tk(got))}${R("Amount Due",tk(c.due),c.due?"neg":"")}</div>
+<div class="card"><b>💸 Total Expenses So Far</b>${R("Jersey Cost + Freight (all batches)",tk(kena))}${R("Packaging",tk(S.pkg.t))}${R("Recurring Monthly Expenses (Rent/Bills)",tk(c.recurringTot),"low")}${R("Courier / Other Expenses",tk(c.opx+c.courier))}${R("Ad Spend",tk(c.spend))}${R("<b>Total Expense (Investment)</b>",tk(c.invest))}</div>
+<div class="card"><b>💰 Sales Summary</b>${R("Sales ("+c.sp+" pcs, delivery included)",tk(c.rev))}${R("Jersey Cost",tk(c.cg))}${R("Recurring Fixed Expenses ("+tk(activeMonthlyTotal)+"/mo)",tk(c.recurringTot),"low")}${R("Ads + Courier + Other Expenses",tk(c.spend+c.opx+c.courier))}${R("<b>Net Profit So Far</b>",tk(c.net),c.net<0?"neg":"pos")}${R("Amount Received",tk(got))}${R("Amount Due",tk(c.due),c.due?"neg":"")}</div>
 <div class="card"><b>🎯 If All Stock Sells</b>${R("Total Expected Sales",tk(c.rev+mv))}${R("<b>Total Expected Profit</b>",tk(c.net+sp_),c.net+sp_<0?"neg":"pos")}<div class="sm" style="margin-top:6px">= Ekhon-er net lav (${tk(c.net)}) + stock-er expected lav (${tk(sp_)}). Future ad spend and delivery/courier not factored in.</div></div>
 <h2>Stock Value by Product</h2><div class="card">${S.products.map(p=>{const m=SL.reduce((x,sl)=>x+vp(p,sl)*p.v[sl].price,0),k=SL.reduce((x,sl)=>x+vp(p,sl)*unit(p,sl),0);return`<div class="row"><span>${esc(p.name)}<br><span class="sm">${tot(p)} pcs · cost ${tk(k)} · sale ${tk(m)}</span></span><b class="${m-k<0?"neg":"pos"}">${tk(m-k)}</b></div>`}).join("")||'<div class="sm">No products yet</div>'}</div>`;
   }
   if(tab=="due"){
     const L=live.filter(o=>dueOf(o)>0);
-    h=`<div class="card"><div class="k">Total Due</div><div class="v low">${tk(c.due)}</div><div class="sm">${L.length} customers with pending balance</div></div>${L.map(o=>{return`<div class="card"><div class="row" style="border:0;padding:0"><span><b>${esc(o.name)}</b><br><span class="sm">${esc(o.phone)} · ${o.date}</span></span><b class="low">${tk(dueOf(o))}</b></div><div class="sm">${o.items.map(i=>esc(i.name)+" ×"+i.qty).join(", ")} · Total ${tk(total(o))}, Paid ${tk(o.paid)}</div><div style="display:flex;gap:6px;margin-top:8px"><input id="pay${o.id}" type="number" placeholder="Amount received"><button style="width:auto" onclick="payIn('${o.id}')">Joma</button><button class="s" onclick="full('${o.id}')">Full</button></div><div style="margin-top:8px"><a class="wa" target="_blank" rel="noopener" href="${waLink(o.phone,"Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support!")}">💬 WhatsApp reminder</a> <button class="s" onclick='copyMsg(this,${JSON.stringify("Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support!")})'>📋</button></div></div>`}).join("")||'<div class="card sm">No outstanding dues 🎉</div>'}`;
+    h=`<div class="card"><div class="k">Total Due</div><div class="v low">${tk(c.due)}</div><div class="sm">${L.length} customers with pending balance</div></div>${L.map(o=>{return`<div class="card"><div class="row" style="border:0;padding:0"><span><b>${esc(o.name)}</b><br><span class="sm">${esc(o.phone)} · ${o.date}</span></span><b class="low">${tk(dueOf(o))}</b></div><div class="sm">${o.items.map(i=>esc(i.name)+" ×"+i.qty).join(", ")} · Total ${tk(total(o))}, Paid ${tk(o.paid)}</div><div style="display:flex;gap:6px;margin-top:8px"><input id="pay${o.id}" type="number" placeholder="Amount received"><button style="width:auto" onclick="payIn('${o.id}')">Joma</button><button class="s" onclick="full('${o.id}')">Full</button></div><div style="margin-top:8px"><a class="wa" target="_blank" rel="noopener" href="${waLink(o.phone,"Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support!")}">💬 WhatsApp reminder</a> <button class="s" onclick="copyDueMsg('${o.id}',this)" title="Copy reminder message">📋</button></div></div>`}).join("")||'<div class="card sm">No outstanding dues 🎉</div>'}`;
   }
   if(tab=="pro"){
     const it=[];sold.forEach(o=>o.items.forEach(x=>it.push([o,x])));
@@ -1546,10 +1869,11 @@ ${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Cle
       const cour = mOrders.reduce((a, o) => a + (o.courier || 0), 0);
       const ads = S.ads.filter(a => a.date && a.date.startsWith(key)).reduce((a, x) => a + x.spend, 0);
       const exp = S.exp.filter(e => EX.includes(e.cat) && e.date && e.date.startsWith(key)).reduce((a, e) => a + e.amt, 0);
-      const profit = rev - cg - cour - ads - exp;
+      const mRecurring = recurringExpenseForMonth(key);
+      const profit = rev - cg - cour - ads - exp - mRecurring;
       const units = mOrders.reduce((a, o) => a + o.items.reduce((x, i) => x + i.qty, 0), 0);
 
-      mData.push({ key, shortLabel, fullLabel, rev, profit, units, count: mOrders.length });
+      mData.push({ key, shortLabel, fullLabel, rev, profit, units, count: mOrders.length, mRecurring });
     }
     const maxAbsProfit = Math.max(...mData.map(m => Math.abs(m.profit)), 1);
     const total6mProfit = mData.reduce((a, m) => a + m.profit, 0);
@@ -1570,7 +1894,7 @@ ${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Cle
         ${mData.map(m => {
           const h = m.profit === 0 ? 3 : Math.max(8, Math.round((Math.abs(m.profit) / maxAbsProfit) * 75));
           const isPos = m.profit >= 0;
-          const barColor = m.profit === 0 ? 'var(--b)' : isPos ? 'linear-gradient(180deg, var(--pos), rgba(22, 163, 74, 0.75))' : 'linear-gradient(180deg, var(--neg), rgba(220, 38, 38, 0.75))';
+          const barColor = m.profit === 0 ? 'var(--b)' : isPos ? 'linear-gradient(180deg, var(--pos), rgba(16, 185, 129, 0.75))' : 'linear-gradient(180deg, var(--neg), rgba(239, 68, 68, 0.75))';
           const txtColor = m.profit === 0 ? 'var(--m)' : isPos ? 'var(--pos)' : 'var(--neg)';
           return `
             <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px">
@@ -1590,12 +1914,12 @@ ${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Cle
       </div>
     </div>`;
 
-    h=profitChartHtml+`<div class="card"><b>🧾 Net Profit — Step by Step</b>${R("Jersey Sales (after discount)",tk(jrev))}${R("+ Delivery Charge (Paid by Customer)",tk(delv))}${R("<b>= Total Sales</b>",tk(c.rev))}${R("− Jersey Buying Cost",tk(kn))}${R("− Freight (per pc share)",tk(vr))}${R("− Packaging (per pc share)",tk(pkS))}${R("− Paid to Courier",tk(cour))}${R("− Other Expenses",tk(oth))}${R("− Ad Spend",tk(c.spend))}${R("<b>= Net Profit</b>",tk(c.net),c.net<0?"neg":"pos")}<div class="sm" style="margin-top:6px">Margin ${pc(c.net)} · Total investment (stock+packaging+expenses+ads): ${tk(c.invest)}</div></div>
-<div class="card"><b>📊 Where Every ৳100 of Sales Goes</b>${R("Jersey Cost",pc(kn))}${R("Freight",pc(vr))}${R("Packaging",pc(pkS))}${R("Courier",pc(cour))}${R("Other Expenses",pc(oth))}${R("Ads",pc(c.spend))}${R("<b>Profit</b>",pc(c.net),c.net<0?"neg":"pos")}</div>
+    h=profitChartHtml+`<div class="card"><b>🧾 Net Profit — Step by Step</b>${R("Jersey Sales (after discount)",tk(jrev))}${R("+ Delivery Charge (Paid by Customer)",tk(delv))}${R("<b>= Total Sales</b>",tk(c.rev))}${R("− Jersey Buying Cost",tk(kn))}${R("− Freight (per pc share)",tk(vr))}${R("− Packaging (per pc share)",tk(pkS))}${R("− Paid to Courier",tk(cour))}${R("− Recurring Fixed Expenses (Rent, Utilities, etc.)",tk(c.recurringTot),"low")}${R("− Other Expenses",tk(oth))}${R("− Ad Spend",tk(c.spend))}${R("<b>= Net Profit</b>",tk(c.net),c.net<0?"neg":"pos")}<div class="sm" style="margin-top:6px">Margin ${pc(c.net)} · Total investment (stock+packaging+expenses+ads): ${tk(c.invest)}</div></div>
+<div class="card"><b>📊 Where Every ৳100 of Sales Goes</b>${R("Jersey Cost",pc(kn))}${R("Freight",pc(vr))}${R("Packaging",pc(pkS))}${R("Recurring Expenses",pc(c.recurringTot))}${R("Courier",pc(cour))}${R("Other Expenses",pc(oth))}${R("Ads",pc(c.spend))}${R("<b>Profit</b>",pc(c.net),c.net<0?"neg":"pos")}</div>
 <h2>Full Cost Breakdown per Jersey</h2><div class="sm" style="margin-bottom:6px">Tap a jersey to see its full cost breakdown. Freight and packaging are split across all units.</div>${S.products.map(p=>SL.filter(sl=>p.v[sl].cost>0).map(sl=>cc(p,sl)).join("")).join("")||'<div class="card sm">Add jerseys in Stock to see full breakdown</div>'}
 <h2>Payment Method Breakdown</h2><div class="card">${(()=>{const pm={};sold.forEach(o=>{const k=o.pay||"COD";pm[k]=(pm[k]||0)+total(o)});return PAYM.map(k=>pm[k]?R(k,tk(pm[k])):"").join("")||'<div class="sm">No sales yet</div>'})()}</div>
 <h2>Best-Selling Products</h2><div class="card">${Object.values(by).sort((a,b)=>b.q-a.q).map((b,idx)=>`<div class="row"><span>${idx==0?"🏆 ":""}${esc(b.n)}<br><span class="sm">${b.q} units sold</span></span><b>${tk(b.r)}</b></div>`).join("")||'<div class="sm">No sales yet</div>'}</div>
-<h2>Monthly Report</h2><div class="card">${(()=>{const m={};sold.forEach(o=>{const k=o.date.slice(0,7),x=m[k]=m[k]||{r:0,c:0,n:0};x.r+=total(o);x.c+=cogs(o);x.n++});return Object.entries(m).sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>`<div class="row"><span>${k}<br><span class="sm">${v.n} orders</span></span><span style="text-align:right"><b>${tk(v.r)}</b><br><span class="sm">profit ${tk(v.r-v.c)}</span></span></div>`).join("")||'<div class="sm">No sales yet</div>'})()}</div>
+<h2>Monthly Report</h2><div class="card">${(()=>{const m={};sold.forEach(o=>{const k=o.date.slice(0,7),x=m[k]=m[k]||{r:0,c:0,n:0};x.r+=total(o);x.c+=cogs(o);x.n++});return Object.entries(m).sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>{const rec=recurringExpenseForMonth(k);return`<div class="row"><span>${k}<br><span class="sm">${v.n} orders · rec ${tk(rec)}</span></span><span style="text-align:right"><b>${tk(v.r)}</b><br><span class="sm">profit ${tk(v.r-v.c-rec)}</span></span></div>`}).join("")||'<div class="sm">No sales yet</div>'})()}</div>
 <h2>Order-wise Breakdown</h2>${sold.slice(0,15).map(oc).join("")||'<div class="card sm">No sales yet</div>'}
 <h2>Other Expenses</h2><div class="card"><div class="f"><select id="ec"><option>Other</option></select><div class="grid"><input id="ea" type="number" placeholder="Amount (৳)"><input id="ed" type="date" value="${today()}"></div><input id="en" placeholder="Note (e.g. tea, transport)"></div><button onclick="addExp()">+ Add Expense</button><div class="sm" style="margin-top:6px">Do not log buying cost, freight, packaging or courier here — those are auto-calculated from Stock and Orders.</div></div>
 <div class="card">${S.exp.map(e=>`<div class="row"><span>${esc(e.cat)}${EX.includes(e.cat)?"":' <span class="tag">old</span>'}<br><span class="sm">${e.date} ${esc(e.note)}</span></span><span><b>${tk(e.amt)}</b> <button class="d" onclick="sure(this,()=>delE('${e.id}'))">×</button></span></div>`).join("")||'<div class="sm">No expenses recorded</div>'}</div>
@@ -1732,7 +2056,8 @@ async function syncFromFirestore(){
         pendingSync = false;
         try{localStorage.removeItem("cbd_pending_sync")}catch(e){}
       } else {
-        S = Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0},monthlyGoal:50000}, JSON.parse(JSON.stringify(remoteData)));
+        S = Object.assign({products:[],orders:[],ads:[],exp:[],recurringExp:[],pkg:{t:0,q:0},monthlyGoal:50000}, JSON.parse(JSON.stringify(remoteData)));
+        norm();
         render();
         if($("st")) $("st").textContent = "✓ synced";
         persistAll(S);
