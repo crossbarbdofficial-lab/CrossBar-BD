@@ -1,0 +1,6 @@
+{
+  "name": "CrossBar BD",
+  "description": "CrossBar BD Manager - Complete jersey business management tool for stock, orders, invoices, dues, profit and ads.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

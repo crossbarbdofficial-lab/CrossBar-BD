@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CrossBar BD Manager</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Local Bundled html2canvas for 100% offline support with CDN fallback -->
+<script src="js/html2canvas.min.js"></script>
+<script>
+if (typeof html2canvas === 'undefined') {
+  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>');
+}
+</script>
+<!-- Local Bundled Firebase Compat for Firestore & Auth with CDN fallback -->
+<script src="js/firebase-app-compat.js"></script>
+<script src="js/firebase-auth-compat.js"></script>
+<script src="js/firebase-firestore-compat.js"></script>
+<script>
+if (typeof firebase === 'undefined') {
+  document.write('<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"><\/script>');
+  document.write('<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"><\/script>');
+  document.write('<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"><\/script>');
+}
+</script>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CrossBar BD">
+<meta name="theme-color" content="#0a0f1e">
+<style>
+:root{
+  --bg:#f5f6f8;--c:#fff;--t:#14171a;--m:#6b7280;--b:#e5e7eb;--a:#16a34a;--r:#dc2626;--pos:#16a34a;--neg:#dc2626;--btnTxt:#fff;
+  /* Specific Status Color Variables */
+  --st-pre-bg:#fef9c3;--st-pre-text:#854d0e;--st-pre-border:#facc15;
+  --st-conf-bg:#dcfce7;--st-conf-text:#15803d;--st-conf-border:#22c55e;
+  --st-delv-bg:#dbeafe;--st-delv-text:#1d4ed8;--st-delv-border:#3b82f6;
+  --st-canc-bg:#f3f4f6;--st-canc-text:#4b5563;--st-canc-border:#9ca3af;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1214;--c:#1a1e22;--t:#eef0f2;--m:#9aa3ad;--b:#2b3137;
+    --st-pre-bg:rgba(234,179,8,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(234,179,8,0.55);
+    --st-conf-bg:rgba(34,197,94,0.22);--st-conf-text:#4ade80;--st-conf-border:rgba(34,197,94,0.55);
+    --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
+    --st-canc-bg:rgba(156,163,175,0.2);--st-canc-text:#9ca3af;--st-canc-border:rgba(156,163,175,0.4);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f5f6f8;--c:#fff;--t:#14171a;--m:#6b7280;--b:#e5e7eb;--a:#16a34a;--r:#dc2626;--pos:#16a34a;--neg:#dc2626;--btnTxt:#fff;
+  --st-pre-bg:#fef9c3;--st-pre-text:#854d0e;--st-pre-border:#facc15;
+  --st-conf-bg:#dcfce7;--st-conf-text:#15803d;--st-conf-border:#22c55e;
+  --st-delv-bg:#dbeafe;--st-delv-text:#1d4ed8;--st-delv-border:#3b82f6;
+  --st-canc-bg:#f3f4f6;--st-canc-text:#4b5563;--st-canc-border:#9ca3af;
+}
+:root[data-theme="dark"]{
+  --bg:#0f1214;--c:#1a1e22;--t:#eef0f2;--m:#9aa3ad;--b:#2b3137;--a:#22c55e;--btnTxt:#fff;
+  --st-pre-bg:rgba(234,179,8,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(234,179,8,0.55);
+  --st-conf-bg:rgba(34,197,94,0.22);--st-conf-text:#4ade80;--st-conf-border:rgba(34,197,94,0.55);
+  --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
+  --st-canc-bg:rgba(156,163,175,0.2);--st-canc-text:#9ca3af;--st-canc-border:rgba(156,163,175,0.4);
+}
+:root[data-theme="stadium"]{
+  --bg:#0a0f1e;--c:#121b30;--t:#f3f6ff;--m:#8892b0;--b:#23304d;--a:#f2b705;--btnTxt:#0a0f1e;--pos:#22e07a;--neg:#ff5470;
+  --st-pre-bg:rgba(242,183,5,0.25);--st-pre-text:#fde047;--st-pre-border:rgba(242,183,5,0.55);
+  --st-conf-bg:rgba(34,224,122,0.22);--st-conf-text:#22e07a;--st-conf-border:rgba(34,224,122,0.55);
+  --st-delv-bg:rgba(59,130,246,0.22);--st-delv-text:#60a5fa;--st-delv-border:rgba(59,130,246,0.55);
+  --st-canc-bg:rgba(136,146,176,0.2);--st-canc-text:#8892b0;--st-canc-border:rgba(136,146,176,0.4);
+}
+:root[data-theme="stadium"] body{background-image:radial-gradient(circle at 15% 0%,rgba(242,183,5,.06),transparent 40%),radial-gradient(circle at 100% 100%,rgba(34,224,122,.05),transparent 45%)}
+:root[data-theme="stadium"] .card,:root[data-theme="stadium"] .hl{background:linear-gradient(180deg,var(--c),rgba(255,255,255,.015))}
+:root[data-theme="stadium"] h1{position:relative;padding-bottom:10px}
+:root[data-theme="stadium"] h1::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(45deg,var(--a) 0 8px,transparent 8px 16px);opacity:.6;border-radius:3px}
+:root[data-theme="stadium"] nav{background:linear-gradient(180deg,rgba(18,27,48,.95),var(--c))}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:640px;margin:auto;padding:12px 12px 90px;min-height:100vh}
+h1{font-size:18px;margin:4px 0 10px}h2{font-size:15px;margin:14px 0 6px}.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.k{font-size:12px;color:var(--m)}.v{font-size:20px;font-weight:700}
+input,select,button{font:inherit;padding:9px;border-radius:8px;border:1px solid var(--b);background:var(--c);color:var(--t);width:100%}
+button{background:var(--a);color:var(--btnTxt);border:0;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}button.s{background:var(--b);color:var(--t);width:auto;padding:6px 11px}button.d{background:var(--neg);color:#fff;width:auto;padding:6px 11px}
+.f{display:grid;gap:6px;margin-bottom:8px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--b)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom,0px);max-width:640px;margin:auto;z-index:100}
+nav button{background:none;color:var(--m);border-radius:0;padding:12px 0;font-size:9.5px;flex:1}nav button.on{color:var(--a);font-weight:700}
+.xs{padding:5px 9px!important}.hl{background:var(--bg);border-radius:8px;padding:8px;margin:8px 0;font-size:13px}.tag{font-size:11px;padding:3px 8px;border-radius:99px;background:var(--b);font-weight:600;display:inline-flex;align-items:center;line-height:1.2}.tag.ok{background:#16a34a22;color:#16a34a}.tag.wt{background:#eab30822;color:#ca8a04}.tag.no{background:#dc262622;color:#dc2626}
+.tag.st-pre{background:var(--st-pre-bg);color:var(--st-pre-text);border:1px solid var(--st-pre-border);font-weight:700}
+.tag.st-conf{background:var(--st-conf-bg);color:var(--st-conf-text);border:1px solid var(--st-conf-border);font-weight:700}
+.tag.st-delv{background:var(--st-delv-bg);color:var(--st-delv-text);border:1px solid var(--st-delv-border);font-weight:700}
+.tag.st-canc{background:var(--st-canc-bg);color:var(--st-canc-text);border:1px solid var(--st-canc-border);font-weight:600}
+.card.order-card{border-left-width:4px;transition:border-color .15s ease}
+.card.order-card.st-pre{border-left-color:var(--st-pre-border)}
+.card.order-card.st-conf{border-left-color:var(--st-conf-border)}
+.card.order-card.st-delv{border-left-color:var(--st-delv-border)}
+.card.order-card.st-canc{border-left-color:var(--st-canc-border);opacity:0.85}
+.low,.neg{color:var(--neg)}.pos{color:var(--pos)}.sm{font-size:13px;color:var(--m)}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.grid5 input{padding:8px 4px;text-align:center}.mini{width:78px;padding:6px}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:9px 18px;border-radius:99px;font-size:14px;display:none;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:90%;text-align:center}
+/* Sync Status Badge */
+.sync-badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;line-height:1.2;width:fit-content;user-select:none;-webkit-tap-highlight-color:transparent}
+.sync-badge.sync-synced{background:rgba(22,163,74,0.15);color:#16a34a;border:1px solid rgba(22,163,74,0.35)}
+.sync-badge.sync-pending{background:rgba(234,179,8,0.18);color:#ca8a04;border:1px solid rgba(234,179,8,0.5)}
+.sync-badge.sync-offline{background:rgba(220,38,38,0.15);color:#dc2626;border:1px solid rgba(220,38,38,0.4)}
+.sync-badge.sync-syncing{background:rgba(59,130,246,0.15);color:#2563eb;border:1px solid rgba(59,130,246,0.4)}
+.sync-badge.sync-local{background:var(--b);color:var(--m);border:1px solid var(--b)}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .sync-badge.sync-synced{color:#4ade80;border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.2)}
+  :root:not([data-theme="light"]) .sync-badge.sync-pending{color:#fde047;border-color:rgba(234,179,8,0.55);background:rgba(234,179,8,0.22)}
+  :root:not([data-theme="light"]) .sync-badge.sync-offline{color:#f87171;border-color:rgba(239,68,68,0.55);background:rgba(239,68,68,0.22)}
+  :root:not([data-theme="light"]) .sync-badge.sync-syncing{color:#60a5fa;border-color:rgba(59,130,246,0.55);background:rgba(59,130,246,0.22)}
+}
+:root[data-theme="dark"] .sync-badge.sync-synced,:root[data-theme="stadium"] .sync-badge.sync-synced{color:#4ade80;border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.2)}
+:root[data-theme="dark"] .sync-badge.sync-pending,:root[data-theme="stadium"] .sync-badge.sync-pending{color:#fde047;border-color:rgba(234,179,8,0.55);background:rgba(234,179,8,0.22)}
+:root[data-theme="dark"] .sync-badge.sync-offline,:root[data-theme="stadium"] .sync-badge.sync-offline{color:#f87171;border-color:rgba(239,68,68,0.55);background:rgba(239,68,68,0.22)}
+:root[data-theme="dark"] .sync-badge.sync-syncing,:root[data-theme="stadium"] .sync-badge.sync-syncing{color:#60a5fa;border-color:rgba(59,130,246,0.55);background:rgba(59,130,246,0.22)}
+/* Cloud Sync Modal */
+#cloudModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+#cloudModal.open{display:flex}
+.modalBox{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- Top Header Bar -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+  <h1 style="margin:0;display:flex;align-items:center;gap:8px">
+    <img id="logo" src="icons/icon-192.png" alt="CrossBar BD" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:#0a0f1e">
+    <span style="display:flex;flex-direction:column;gap:1px">
+      <span style="font-size:16px;font-weight:700;line-height:1.2">CrossBar BD</span>
+      <span id="syncStatusBadge" class="sync-badge sync-local" onclick="handleSyncBadgeClick()" title="Tap to check sync status">💾 Checking...</span>
+    </span>
+  </h1>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button id="pwaInstallBtn" onclick="installPwa()" type="button" class="s" style="display:none;padding:6px 10px;font-size:12px;border-radius:8px;background:var(--a);color:var(--btnTxt)" title="Install CrossBar App">📲 Install</button>
+    <button id="cloudBtn" onclick="openCloudModal()" type="button" class="s" style="padding:6px 10px;font-size:12px;border-radius:8px" title="Cloud & Firebase Sync">☁️ Cloud</button>
+    <button id="thb" onclick="cycleTheme()" type="button" style="flex:none;width:auto;padding:8px 12px;font-size:15px;position:relative;z-index:5" title="Switch Theme">🎨</button>
+  </div>
+</div>
+
+<!-- Offline & Pending Sync Banner -->
+<div id="syncAlertBanner" style="display:none;margin-bottom:8px;padding:8px 12px;border-radius:8px;font-size:12px;align-items:center;justify-content:space-between;gap:8px">
+  <span id="syncAlertText" style="flex:1"></span>
+  <button id="syncRetryBtn" class="s xs" onclick="trySyncNow()" style="display:none;padding:4px 8px;font-size:11px;white-space:nowrap">Sync Now</button>
+</div>
+
+<div id="app"></div>
+<div id="invCap" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff"></div>
+<nav id="nav"></nav>
+
+<!-- Cloud Sync Modal -->
+<div id="cloudModal">
+  <div class="modalBox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0">☁️ Firebase Cloud Sync</h3>
+      <button class="s xs" onclick="closeCloudModal()">✕ Close</button>
+    </div>
+    <div class="sm" style="line-height:1.5;margin-bottom:10px">
+      Firebase Firestore allows real-time data sync across your Android phone, PC browser, and other devices using document <b>crossbar/state</b>. Data is also automatically backed up to LocalStorage on this device so you can work offline.
+    </div>
+    <div class="card" style="padding:10px;margin-bottom:10px">
+      <div class="k">Sync Status</div>
+      <div id="cloudStatusText" style="font-weight:600;margin-top:2px">Checking...</div>
+      <div id="authUserText" class="sm" style="margin-top:4px"></div>
+    </div>
+    <div id="authActions" style="margin-bottom:12px;display:flex;gap:6px">
+      <button id="gLoginBtn" onclick="loginWithGoogle()" style="flex:1">🔑 Sign In with Google</button>
+      <button id="gLogoutBtn" class="s" onclick="logoutFirebase()" style="display:none">Log Out</button>
+    </div>
+    <details class="card" style="margin-bottom:10px">
+      <summary style="cursor:pointer;font-weight:600;font-size:13px">⚙️ Firebase Web Configuration</summary>
+      <div class="sm" style="margin:6px 0">
+        If you have a Firebase project (e.g. from Firebase Console), paste the configuration JSON or credentials here:
+      </div>
+      <textarea id="fbCfgInput" rows="6" style="width:100%;font-size:11px;font-family:monospace;padding:6px;border-radius:6px;background:var(--bg);color:var(--t);border:1px solid var(--b)" placeholder='{\n  "apiKey": "...",\n  "authDomain": "...",\n  "projectId": "crossbar-bd",\n  "storageBucket": "...",\n  "messagingSenderId": "...",\n  "appId": "..."\n}'></textarea>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button onclick="saveFirebaseConfig()" class="s" style="flex:1">Save & Connect</button>
+      </div>
+    </details>
+    <div class="card" style="padding:10px;margin-bottom:10px;border:1px solid rgba(46,204,113,0.3);background:rgba(46,204,113,0.06)">
+      <div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px">
+        <span>📲 Install CrossBar BD on Mobile</span>
+      </div>
+      <div class="sm" style="margin:4px 0 8px">
+        Install directly on your phone home screen or download the APK installer:
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button id="pwaInstallBtn" onclick="installPWA()" style="background:#2ecc71;color:#fff;font-weight:bold;display:none">
+          ✨ Add to Phone Home Screen (1-Tap Install)
+        </button>
+        <a href="CrossBarBD.apk" download="CrossBarBD.apk" style="text-decoration:none;display:block">
+          <button style="width:100%;background:var(--s);color:var(--t);border:1px solid var(--b);font-weight:600">
+            📥 Download Android APK (22 MB)
+          </button>
+        </a>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button onclick="forceSyncCloud()" style="flex:1">🔄 Force Cloud Sync</button>
+      <button class="s" onclick="closeCloudModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const pwaBtn = document.getElementById('pwaInstallBtn');
+  if (pwaBtn) pwaBtn.style.display = 'block';
+});
+
+async function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('Install outcome:', outcome);
+    deferredPrompt = null;
+    const pwaBtn = document.getElementById('pwaInstallBtn');
+    if (pwaBtn) pwaBtn.style.display = 'none';
+  } else {
+    toast("Tap Chrome menu (⋮) > 'Install app' or 'Add to Home screen'");
+  }
+}
+
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('CrossBar PWA Service Worker registered:', reg.scope);
+    }).catch(err => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+
+// Themes
+function cycleTheme(){
+  const o=["","dark","stadium"], cur=localStorage.getItem("cbdTheme")||"";
+  const n=o[(o.indexOf(cur)+1)%o.length];
+  localStorage.setItem("cbdTheme",n);
+  applyTheme();
+}
+function applyTheme(){
+  const t=localStorage.getItem("cbdTheme")||"";
+  document.documentElement.setAttribute("data-theme",t||"auto");
+  if($("thb")) $("thb").textContent=t=="stadium"?"🏆":t=="dark"?"🌙":"🎨";
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if(metaTheme) metaTheme.setAttribute("content", t=="stadium"?"#0a0f1e":t=="dark"?"#0f1214":"#f5f6f8");
+}
+
+const TABS=[["dash","Dashboard"],["ord","Orders"],["cust","Customers"],["stk","Stock"],["sum","Overview"],["due","Due"],["pro","Profit"],["ads","Ads"]];
+const SZ=["S","M","L","XL","2XL"], SL=["Half","Full"], KP={Player:[1150,1250],Retro:[1250,1350],Fan:[800,800]}, EX=["Courier","Other"];
+let S={products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0},monthlyGoal:50000,histImported:false}, tab="dash", doc=null, fbDb=null, fbAuth=null, curUser=null, ed=null, dirty=false, stq="", stf="all", cart=[], lastMeta={area:"Dhaka",odl:80,ocr:80}, cinfo={name:"",phone:"",addr:"",ref:"",notes:""};
+let ordStFilter = "all", ordDateFrom = "", ordDateTo = "", ordSearch = "";
+const so=new Set();
+
+function getFilteredOrders(){
+  return S.orders.filter(o => {
+    if (ordStFilter !== "all" && o.status !== ordStFilter) return false;
+    if (ordDateFrom && o.date < ordDateFrom) return false;
+    if (ordDateTo && o.date > ordDateTo) return false;
+    if (ordSearch) {
+      const q = ordSearch.trim().toLowerCase();
+      const text = (o.name + " " + (o.phone||"") + " " + (o.addr||"") + " " + (o.ref||"") + " " + (o.notes||"") + " " + o.items.map(i => i.name + " " + i.slv + " " + i.size).join(" ")).toLowerCase();
+      if (!text.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function setOrdFilter(st){ ordStFilter = st; render(); }
+function setOrdDateFrom(val){ ordDateFrom = val; render(); }
+function setOrdDateTo(val){ ordDateTo = val; render(); }
+function setOrdQuickDate(type){
+  if (type === 'today') {
+    ordDateFrom = ordDateTo = today();
+  } else if (type === '7days') {
+    const d = new Date(); d.setDate(d.getDate() - 6);
+    ordDateFrom = d.toISOString().slice(0,10); ordDateTo = today();
+  } else if (type === 'month') {
+    ordDateFrom = today().slice(0,7) + "-01"; ordDateTo = today();
+  } else if (type === 'clear') {
+    ordDateFrom = ""; ordDateTo = "";
+  }
+  render();
+}
+function clearOrdFilters(){
+  ordStFilter = "all"; ordDateFrom = ""; ordDateTo = ""; ordSearch = "";
+  render();
+}
+
+const INITIAL_PRODUCTS = [
+  // --- National Teams ---
+  { name: "Argentina Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 750, price: 1150, sizes: { S: 2, M: 5, L: 6, XL: 3, "2XL": 1 } }, Full: { cost: 850, price: 1250, sizes: { S: 1, M: 2, L: 2, XL: 1, "2XL": 0 } } } },
+  { name: "Argentina Away", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Brazil Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 2, M: 5, L: 5, XL: 3, "2XL": 1 } }, Full: { cost: 900, price: 1250, sizes: { S: 1, M: 2, L: 2, XL: 1, "2XL": 0 } } } },
+  { name: "Brazil Away", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Germany Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 750, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 1 } }, Full: { cost: 850, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "France Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 830, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 1 } }, Full: { cost: 930, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Portugal Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Spain Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Spain Away", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "England Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Uruguay Away", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 830, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 1 } }, Full: { cost: 930, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Korea Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 830, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 1 } }, Full: { cost: 930, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Netherlands Away", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 830, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 1 } }, Full: { cost: 930, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Norway Home", team: "National", kind: "Player", vara: 20, v: { Half: { cost: 830, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 930, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+
+  // --- Club Home & Away Jerseys ---
+  { name: "Real Madrid Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 750, price: 1150, sizes: { S: 2, M: 6, L: 6, XL: 3, "2XL": 1 } }, Full: { cost: 850, price: 1250, sizes: { S: 1, M: 2, L: 2, XL: 1, "2XL": 0 } } } },
+  { name: "Real Madrid Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Real Madrid Third", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Barcelona Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 750, price: 1150, sizes: { S: 2, M: 5, L: 5, XL: 3, "2XL": 1 } }, Full: { cost: 850, price: 1250, sizes: { S: 1, M: 2, L: 2, XL: 1, "2XL": 0 } } } },
+  { name: "Barcelona Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Manchester City Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 2, M: 4, L: 4, XL: 2, "2XL": 1 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Manchester City Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Manchester United Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 2, M: 4, L: 5, XL: 2, "2XL": 1 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 2, XL: 0, "2XL": 0 } } } },
+  { name: "Manchester United Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Arsenal Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 2, M: 4, L: 5, XL: 2, "2XL": 1 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 2, XL: 0, "2XL": 0 } } } },
+  { name: "Arsenal Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Chelsea Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Chelsea Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Liverpool Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Liverpool Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Bayern Munich Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Bayern Munich Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "PSG Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "PSG Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 800, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 2, "2XL": 0 } }, Full: { cost: 900, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Inter Miami Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 2, M: 6, L: 6, XL: 3, "2XL": 1 } }, Full: { cost: 880, price: 1250, sizes: { S: 1, M: 2, L: 2, XL: 1, "2XL": 0 } } } },
+  { name: "Inter Miami Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 4, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Juventus Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Juventus Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "AC Milan Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "AC Milan Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Borussia Dortmund Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 4, XL: 2, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Tottenham Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Al Nassr Home", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 2, M: 4, L: 4, XL: 2, "2XL": 1 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } },
+  { name: "Al Nassr Away", team: "Club", kind: "Player", vara: 20, v: { Half: { cost: 780, price: 1150, sizes: { S: 1, M: 3, L: 3, XL: 1, "2XL": 0 } }, Full: { cost: 880, price: 1250, sizes: { S: 0, M: 1, L: 1, XL: 0, "2XL": 0 } } } }
+];
+
+function buildProductFromDef(p){
+  let pcs = 0, inv = 0;
+  SL.forEach(sl => {
+    const q = SZ.reduce((a,z) => a + (p.v[sl].sizes[z] || 0), 0);
+    pcs += q;
+    inv += q * (p.v[sl].cost || 0);
+  });
+  const vt = (p.vara || 20) * pcs;
+  return {
+    id: uid(),
+    name: p.name,
+    team: p.team,
+    kind: p.kind,
+    vara: p.vara || 20,
+    vt: vt,
+    bp: pcs,
+    inv: inv + vt,
+    v: JSON.parse(JSON.stringify(p.v))
+  };
+}
+
+function loadDefaultCatalog(showToastMsg = true){
+  const prods = INITIAL_PRODUCTS.map(buildProductFromDef);
+  upd(() => {
+    S.products = prods;
+  });
+  if (showToastMsg) toast("CrossBar BD Catalog loaded (" + prods.length + " jerseys) ✓");
+}
+
+function addMissingCatalogJerseys(showToastMsg = true){
+  const existingNames = new Set(S.products.map(p => (p.name||"").trim().toLowerCase()));
+  const missing = INITIAL_PRODUCTS.filter(p => !existingNames.has(p.name.trim().toLowerCase()));
+  if (missing.length === 0) {
+    if (showToastMsg) toast("All club and national jerseys are already in stock!");
+    return;
+  }
+  const newProds = missing.map(buildProductFromDef);
+  upd(() => {
+    S.products = S.products.concat(newProds);
+  });
+  if (showToastMsg) toast("Added " + newProds.length + " new jerseys to stock! ✓");
+}
+
+function stClass(st){
+  if(st==="Pre-order") return "st-pre";
+  if(st==="Confirmed") return "st-conf";
+  if(st==="Delivered") return "st-delv";
+  if(st==="Cancelled") return "st-canc";
+  return "st-canc";
+}
+
+function renderOrderCardHtml(o){
+  const stCls = stClass(o.status);
+  return `<div class="card order-card ${stCls}"><div class="row" style="border:0;padding:0"><b>${esc(o.name)}</b><span class="tag ${stCls}">${o.status}</span></div><div class="sm">${esc(o.phone)} · ${o.date} · ${o.area}${o.pay?" · "+o.pay:""}</div><div class="sm">📍 ${esc(o.addr||"-")}</div><div>${o.items.map(i=>esc(i.name)+" · "+i.slv+(i.size?" ("+i.size+")":"")+" ×"+i.qty).join(", ")}</div><div class="sm">Delivery ${o.delivery?tk(o.delivery):"Free"}${o.discount?" · Discount "+tk(o.discount):""}</div><div>Total <b>${tk(total(o))}</b> · Paid ${tk(o.paid)}${dueOf(o)?` · <b class="low">Baki ${tk(dueOf(o))}</b>`:""}</div>${o.notes?`<div style="background:var(--bg);border-left:3px solid var(--a);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:12px">📝 <b>Note:</b> ${esc(o.notes)}</div>`:""}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${o.status=="Pre-order"?`<button class="s" onclick="setSt('${o.id}','Confirmed')">Stock arrived</button>`:""}${o.status=="Confirmed"?`<button class="s" onclick="setSt('${o.id}','Delivered')">Delivered</button>`:""}${dueOf(o)&&o.status!="Cancelled"?`<button class="s" onclick="full('${o.id}')">Full paid</button>`:""}${o.status!="Cancelled"?`<button class="s" onclick="sure(this,()=>setSt('${o.id}','Cancelled'))">Cancel</button>`:""}<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,confirmMsg(o))}">💬 Confirm</a><button class="s" onclick='copyMsg(this,${JSON.stringify(confirmMsg(o))})'>📋</button><button class="s" onclick="shareInvoice('${o.id}')">📸 Confirm + Invoice</button>${o.status=="Delivered"?`<a class="s" style="display:inline-block;text-align:center;text-decoration:none;color:inherit;padding:6px 11px;background:var(--b);border-radius:8px" target="_blank" rel="noopener" href="${waLink(o.phone,reviewMsg(o))}">🌟 Review</a>`:""}<button class="s" onclick="invoice('${o.id}')">🧾 Invoice</button><button class="s" onclick="loadReorder('${o.id}')">🔁 Reorder</button><button class="s" onclick="ed='${o.id}';render()">✏️ Edit</button><button class="d" onclick="sure(this,()=>delO('${o.id}'))">×</button></div></div>`;
+}
+
+function renderOrdList(){
+  const container = $("ordListContainer");
+  const summary = $("ordSummaryText");
+  const filtered = getFilteredOrders();
+  if (container) {
+    container.innerHTML = filtered.length ? filtered.map(o => ed == o.id ? editCard(o) : renderOrderCardHtml(o)).join("") : '<div class="card sm" style="text-align:center;padding:18px 10px">No orders found matching the filter.<br><button class="s xs" style="margin-top:8px" onclick="clearOrdFilters()">Reset Filters</button></div>';
+  }
+  if (summary) {
+    summary.innerHTML = `<span>Showing: ${filtered.length} of ${S.orders.length} orders</span><span>Total: ${tk(filtered.reduce((a,o)=>a+total(o),0))}</span>`;
+  }
+}
+
+const HIST_SALES=[
+  {"grp":"solo0","date":"2026-04-06","name":"Forhad","phone":"01933225366","prod":"Argentina Home","size":"M","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo1","date":"2026-04-17","name":"Hira","phone":"","prod":"Germany Home","size":"M","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo2","date":"2026-04-17","name":"Mehedi","phone":"01857402072","prod":"Argentina Home","size":"L","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo3","date":"2026-04-18","name":"Abir","phone":"01727089996","prod":"Argentina Home","size":"L","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo4","date":"2026-04-18","name":"Abir","phone":"01727089996","prod":"Real Madrid Home","size":"M","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo5","date":"2026-04-27","name":"Imran","phone":"01875102616","prod":"Brazil Away","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo6","date":"2026-04-27","name":"Mehedi","phone":"01857402072","prod":"Brazil Away","size":"XL","cost":799.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo7","date":"2026-04-29","name":"Forhad","phone":"01933225366","prod":"Liverpool Home","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo8","date":"2026-04-30","name":"Forhad","phone":"01933225366","prod":"Argentina Away","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":0,"status":"Delivered"},
+  {"grp":"solo9","date":"2026-05-01","name":"Munayem","phone":"01888682599","prod":"Spain Away","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo10","date":"2026-05-02","name":"Munayem","phone":"01888682599","prod":"Brazil Home","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo11","date":"2026-05-08","name":"Imran","phone":"01875102616","prod":"Uruguay Away","size":"M","cost":829.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo12","date":"2026-05-17","name":"Forhad","phone":"01933225366","prod":"Uruguay Away","size":"M","cost":829.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo13","date":"2026-05-17","name":"Nihal","phone":"01868352551","prod":"Uruguay Away","size":"2XL","cost":829.47,"regprice":1150,"discount":100,"paid":1120,"status":"Delivered"},
+  {"grp":"solo14","date":"2026-05-17","name":"Nihal","phone":"01868352551","prod":"Korea Home","size":"2XL","cost":829.47,"regprice":1150,"discount":100,"paid":1120,"status":"Delivered"},
+  {"grp":"solo15","date":"2026-05-17","name":"Nihal","phone":"01868352551","prod":"Netherlands Away","size":"2XL","cost":829.47,"regprice":1150,"discount":50,"paid":1170,"status":"Delivered"},
+  {"grp":"solo16","date":"2026-05-17","name":"Mehedi","phone":"01857402072","prod":"Norway Home","size":"XL","cost":829.47,"regprice":1150,"discount":100,"paid":500,"status":"Delivered"},
+  {"grp":"solo17","date":"2026-05-17","name":"Forhad","phone":"01933225366","prod":"Argentina Home","size":"XL","cost":749.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo18","date":"2026-05-18","name":"Imran","phone":"01875102616","prod":"France Home","size":"M","cost":829.47,"regprice":1150,"discount":150,"paid":1070,"status":"Delivered"},
+  {"grp":"solo19","date":"2026-06-06","name":"Sadia Akter Jannaty","phone":"","prod":"Germany Home","size":"XL","cost":839.47,"regprice":1150,"discount":0,"paid":1220,"status":"Delivered"},
+  {"grp":"sakil","date":"2026-05-23","name":"Sakil","phone":"","prod":"Korea Home","size":"M","cost":829.47,"regprice":1150,"discount":150,"paid":1000,"status":"Confirmed"},
+  {"grp":"sakil","date":"2026-05-23","name":"Sakil","phone":"","prod":"Norway Home","size":"M","cost":829.47,"regprice":1150,"discount":150,"paid":1000,"status":"Confirmed"},
+  {"grp":"sakil","date":"2026-05-23","name":"Sakil","phone":"","prod":"Portugal Home","size":"M","cost":799.47,"regprice":1150,"discount":150,"paid":1000,"status":"Confirmed"},
+  {"grp":"sakil","date":"2026-05-23","name":"Sakil","phone":"","prod":"Germany Home","size":"M","cost":749.47,"regprice":1150,"discount":150,"paid":1000,"status":"Confirmed"},
+  {"grp":"sabbir","date":"2026-06-06","name":"Sabbir","phone":"","prod":"Argentina Home","size":"M","cost":839.47,"regprice":1150,"discount":50,"paid":1100,"status":"Confirmed"},
+  {"grp":"sabbir","date":"2026-06-06","name":"Sabbir","phone":"","prod":"Argentina Home","size":"L","cost":839.47,"regprice":1150,"discount":50,"paid":1100,"status":"Confirmed"},
+  {"grp":"sabbir","date":"2026-06-06","name":"Sabbir","phone":"","prod":"Argentina Away","size":"L","cost":839.47,"regprice":1150,"discount":50,"paid":1100,"status":"Confirmed"},
+  {"grp":"sabbir","date":"2026-06-06","name":"Sabbir","phone":"","prod":"Brazil Home","size":"XL","cost":839.47,"regprice":1150,"discount":50,"paid":1100,"status":"Confirmed"}
+];
+const HIST_META={"sakil":{"area":"Outside Dhaka","delivery":140,"courier":140,"paidExtra":140},"sabbir":{"area":"Dhaka","delivery":0,"courier":0,"paidExtra":0}};
+
+function importHist(){
+  if(S.histImported)return toast("Already imported — use Remove below if you need to redo it");
+  const groups={};
+  HIST_SALES.forEach(h=>{(groups[h.grp]=groups[h.grp]||[]).push(h)});
+  const made=Object.values(groups).map(g=>{
+    const h0=g[0], m=HIST_META[h0.grp]||{area:"Dhaka",delivery:70,courier:70,paidExtra:0};
+    return{
+      id:uid(),date:h0.date,name:h0.name,phone:h0.phone,area:m.area,addr:"",
+      items:g.map(h=>({pid:"hist-"+h.prod.toLowerCase().replace(/\s+/g,"-"),name:h.prod,slv:"Half",size:h.size,qty:1,price:h.regprice,cost:h.cost})),
+      delivery:m.delivery,courier:m.courier,discount:g.reduce((a,h)=>a+h.discount,0),paid:g.reduce((a,h)=>a+h.paid,0)+(m.paidExtra||0),pay:"Cash on Delivery",ref:"",refPct:0,status:h0.status
+    };
+  });
+  upd(()=>{S.orders=S.orders.concat(made);S.orders.sort((a,b)=>b.date.localeCompare(a.date));S.histImported=true});
+  toast(made.length+" purono order import hoyeche ✓");
+}
+function removeHist(){
+  upd(()=>{S.orders=S.orders.filter(o=>!(o.items[0]&&String(o.items[0].pid).startsWith("hist-")));S.histImported=false});
+  toast("Purono import shorie deya hoyeche");
+}
+
+const PAYM=["COD","bKash","Nagad","Bank"];
+const $=id=>document.getElementById(id), tk=n=>(n<0?"-":"")+"৳"+Math.abs(Math.round(n)).toLocaleString("en-IN"), uid=()=>Math.random().toString(36).slice(2,9), today=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const zs=()=>Object.fromEntries(SZ.map(z=>[z,0])), vp=(p,sl)=>SZ.reduce((a,z)=>a+(p.v[sl].sizes[z]||0),0), tot=p=>vp(p,"Half")+vp(p,"Full"), pk=()=>S.pkg&&S.pkg.q?S.pkg.t/S.pkg.q:0, unit=(p,sl)=>p.v[sl].cost+(p.vara||0)+pk();
+
+const norm=()=>{
+  S.exp=S.exp||[];S.ads=S.ads||[];S.pkg=S.pkg||{t:0,q:0};S.biz=S.biz||{phone:""};S.histImported=S.histImported||false;S.refPct=S.refPct===undefined?10:S.refPct;
+  S.products.forEach(p=>{
+    if(!p.v){
+      const f=/full/i.test(p.type||""),o={cost:p.cost||0,price:p.price||0,sizes:p.sizes||zs()},e={cost:0,price:0,sizes:zs()};
+      p.v=f?{Half:e,Full:o}:{Half:o,Full:e};delete p.sizes;delete p.cost;delete p.price;
+    }
+    p.vara=p.vara||0;p.inv=p.inv||0;
+  });
+  S.orders.forEach(o=>o.items.forEach(i=>{i.cost=i.cost||0;i.slv=i.slv||"Half"}));
+};
+
+const irev=o=>o.items.reduce((a,i)=>a+i.qty*i.price,0)-(o.discount||0), cogs=o=>o.items.reduce((a,i)=>a+i.qty*i.cost,0), total=o=>irev(o)+o.delivery, dueOf=o=>Math.max(0,total(o)-o.paid);
+
+function toast(m){
+  const t=$("toast");if(!t)return;t.textContent=m;t.style.display="block";clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",2600);
+}
+
+// Data persistence: Firestore doc crossbar/state + LocalStorage + Sync Status
+let isSyncing = false;
+let pendingSync = localStorage.getItem("cbd_pending_sync") === "true";
+
+function updateSyncStatusUI(){
+  const badge = $("syncStatusBadge");
+  const banner = $("syncAlertBanner");
+  const bannerText = $("syncAlertText");
+  const retryBtn = $("syncRetryBtn");
+  const isOnline = navigator.onLine;
+
+  if(!badge) return;
+  badge.className = "sync-badge";
+
+  if(!isOnline){
+    badge.classList.add("sync-offline");
+    badge.textContent = pendingSync ? "📡 Offline (Pending)" : "📡 Offline";
+    badge.title = pendingSync ? "Offline: Unsaved changes will sync when reconnected" : "Offline: App running from cached service worker";
+    if(banner && bannerText){
+      banner.style.display = "flex";
+      bannerText.innerHTML = pendingSync 
+        ? "<b>📡 Offline Mode:</b> Changes saved on this device. They will automatically sync to Firestore when internet is reconnected."
+        : "<b>📡 Offline Mode:</b> Working with offline cache. You can view orders, calculate profit, and add new sales.";
+      if(retryBtn) retryBtn.style.display = "none";
+    }
+    return;
+  }
+
+  if(isSyncing){
+    badge.classList.add("sync-syncing");
+    badge.textContent = "🔄 Syncing…";
+    badge.title = "Syncing changes with Firebase Firestore...";
+    if(banner) banner.style.display = "none";
+    return;
+  }
+
+  if(pendingSync){
+    badge.classList.add("sync-pending");
+    badge.textContent = "⏳ Sync Pending";
+    badge.title = "Unsynced changes waiting to upload to Firestore";
+    if(banner && bannerText){
+      banner.style.display = "flex";
+      bannerText.innerHTML = "<b>⏳ Pending Sync:</b> You have updates saved locally that haven't synced to Firestore yet.";
+      if(retryBtn){
+        retryBtn.style.display = "inline-block";
+        retryBtn.textContent = "Sync Now";
+      }
+    }
+    return;
+  }
+
+  if(doc){
+    badge.classList.add("sync-synced");
+    badge.textContent = "🟢 Synced";
+    badge.title = "Connected to Firestore doc crossbar/state. All changes saved.";
+    if(banner) banner.style.display = "none";
+  } else {
+    badge.classList.add("sync-local");
+    badge.textContent = "💾 Device Saved";
+    badge.title = "Data saved in local storage. Connect Firebase for multi-device sync.";
+    if(banner) banner.style.display = "none";
+  }
+}
+
+async function trySyncNow(){
+  if(!navigator.onLine){
+    toast("Cannot sync while offline. Check internet connection.");
+    updateSyncStatusUI();
+    return;
+  }
+  if(!doc){
+    toast("Data saved on device. Configure Firebase in Cloud settings to enable cloud sync.");
+    openCloudModal();
+    return;
+  }
+  isSyncing = true;
+  updateSyncStatusUI();
+  try{
+    await doc.set(JSON.parse(JSON.stringify(S)));
+    pendingSync = false;
+    try{ localStorage.removeItem("cbd_pending_sync"); }catch(e){}
+    dirty = false;
+    if($("st")) $("st").textContent = "✓ synced";
+    toast("Firestore cloud sync complete ✓");
+  }catch(e){
+    console.warn("Manual sync error:", e);
+    pendingSync = true;
+    try{ localStorage.setItem("cbd_pending_sync", "true"); }catch(e){}
+    toast("Sync failed: " + (e.message || "Network error"));
+  }finally{
+    isSyncing = false;
+    updateSyncStatusUI();
+    updateCloudUI();
+  }
+}
+
+function handleSyncBadgeClick(){
+  if(!navigator.onLine){
+    toast(pendingSync ? "📡 Offline: Changes saved locally, will sync when reconnected." : "📡 Offline Mode: Working from Service Worker cache.");
+    return;
+  }
+  if(pendingSync){
+    trySyncNow();
+    return;
+  }
+  if(doc){
+    toast("🟢 Firestore Cloud is up to date!");
+  } else {
+    toast("💾 Data saved on this device. Click Cloud to connect Firebase.");
+    openCloudModal();
+  }
+}
+
+window.addEventListener('online', () => {
+  toast("🌐 Internet restored!");
+  updateSyncStatusUI();
+  if(doc && (pendingSync || dirty)){
+    trySyncNow();
+  }
+});
+
+window.addEventListener('offline', () => {
+  toast("📡 Offline: Data saved locally to device.");
+  updateSyncStatusUI();
+});
+
+// Dual-Layer Offline Storage (LocalStorage + Backup Snapshot + IndexedDB Mirror)
+const IDB_NAME = "CrossBarOfflineDB";
+const IDB_STORE = "app_state";
+
+function openOfflineDB(){
+  return new Promise((resolve) => {
+    if(!window.indexedDB) return resolve(null);
+    try{
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains(IDB_STORE)){
+          db.createObjectStore(IDB_STORE, { keyPath: "key" });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    }catch(e){ resolve(null); }
+  });
+}
+
+async function persistToIndexedDB(stateObj){
+  try{
+    const db = await openOfflineDB();
+    if(!db) return;
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const store = tx.objectStore(IDB_STORE);
+    store.put({ key: "current_state", data: JSON.parse(JSON.stringify(stateObj)), updatedAt: Date.now() });
+  }catch(e){
+    console.warn("IndexedDB mirror write error:", e);
+  }
+}
+
+function persistAll(stateObj){
+  const json = JSON.stringify(stateObj);
+  try{ localStorage.setItem("cbd", json); }catch(e){}
+  try{ localStorage.setItem("cbd_backup_snapshot", json); }catch(e){}
+  persistToIndexedDB(stateObj);
+}
+
+async function recoverFromIndexedDBIfEmpty(){
+  try{
+    if(S.orders && S.orders.length > 0) return;
+    const db = await openOfflineDB();
+    if(!db) return;
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const store = tx.objectStore(IDB_STORE);
+    const req = store.get("current_state");
+    req.onsuccess = () => {
+      if(req.result && req.result.data){
+        const recovered = req.result.data;
+        if(recovered.orders && recovered.orders.length > (S.orders ? S.orders.length : 0)){
+          S = Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0},monthlyGoal:50000}, recovered);
+          render();
+          persistAll(S);
+          toast("💾 Auto-recovered records from offline database ✓");
+        }
+      }
+    };
+  }catch(e){
+    console.warn("IndexedDB recovery error:", e);
+  }
+}
+
+let tmr;
+function save(){
+  dirty=true;
+  if($("st")) $("st").textContent="saving…";
+  persistAll(S);
+  
+  if(doc || pendingSync || !navigator.onLine){
+    pendingSync = true;
+    try{ localStorage.setItem("cbd_pending_sync", "true"); }catch(e){}
+  }
+  updateSyncStatusUI();
+
+  clearTimeout(tmr);
+  tmr=setTimeout(async()=>{
+    if(!navigator.onLine){
+      if($("st")) $("st").textContent="(device saved)";
+      updateSyncStatusUI();
+      return;
+    }
+    if(!doc){
+      if($("st")) $("st").textContent="(device saved)";
+      pendingSync = false;
+      try{ localStorage.removeItem("cbd_pending_sync"); }catch(e){}
+      updateSyncStatusUI();
+      return;
+    }
+    isSyncing = true;
+    updateSyncStatusUI();
+    try{
+      await doc.set(JSON.parse(JSON.stringify(S)));
+      if($("st")) $("st").textContent="✓ synced";
+      dirty=false;
+      pendingSync = false;
+      try{ localStorage.removeItem("cbd_pending_sync"); }catch(e){}
+    }catch(e){
+      console.warn("Firestore save fallback to local:", e);
+      if($("st")) $("st").textContent="(device saved)";
+      pendingSync = true;
+      try{ localStorage.setItem("cbd_pending_sync", "true"); }catch(e){}
+    }finally{
+      isSyncing = false;
+      updateSyncStatusUI();
+    }
+  },600);
+}
+function upd(fn){fn();save();render()}
+function sure(b,fn){if(b.dataset.s){fn();return}b.dataset.s=1;const o=b.textContent;b.textContent="Sure?";setTimeout(()=>{delete b.dataset.s;b.textContent=o},3000)}
+
+function kindCh(){const k=KP[$("pk").value];$("pH").value=k[0];$("pF").value=k[1]}
+function addProduct(){
+  const n=$("pn").value.trim();if(!n)return toast("Enter product name");const v={};let pcs=0,inv=0;
+  SL.forEach(sl=>{
+    const c=sl[0],sizes=Object.fromEntries(SZ.map(z=>[z,+$("s"+c+z).value||0])),q=SZ.reduce((a,z)=>a+sizes[z],0),cost=+$("c"+c).value||0;
+    pcs+=q;inv+=q*cost;v[sl]={cost,price:+$("p"+c).value||0,sizes};
+  });
+  if(!pcs)return toast("Enter quantity for at least one size");
+  const vt=+$("pv").value||0;
+  upd(()=>S.products.push({id:uid(),name:n,team:$("ptm").value,kind:$("pk").value,vara:vt/pcs,vt,bp:pcs,inv:inv+vt,v}));
+  toast("Product added ✓");
+}
+
+function adj(id,sl,z,d){upd(()=>{const s=S.products.find(x=>x.id==id).v[sl].sizes;s[z]=Math.max(0,(s[z]||0)+d)})}
+function setV(id,sl,f,v){S.products.find(x=>x.id==id).v[sl][f]=+v||0;save();render();toast("Updated ✓")}
+function delP(id){upd(()=>S.products=S.products.filter(x=>x.id!=id))}
+function savePkg(){upd(()=>S.pkg={t:+$("pkT").value||0,q:+$("pkQ").value||0});toast("Packaging updated ✓")}
+function saveBiz(){upd(()=>S.biz={phone:$("bph").value.trim()});toast("Business info saved ✓")}
+function areaCh(){$("odl").value=$("ocr").value=$("oa").value=="Dhaka"?80:140}
+function cartHave(pid,sl,z){
+  const p=S.products.find(x=>x.id==pid),base=p?(p.v[sl].sizes[z]||0):0;
+  const used=cart.filter(c=>c.pid==pid&&c.slv==sl&&c.size==z).reduce((a,c)=>a+c.qty,0);
+  return base-used;
+}
+function addToCart(){
+  const p=S.products.find(x=>x.id==$("op").value),q=+$("oq").value||1;if(!p)return toast("Select a product");
+  const pre=$("ot").value=="pre",z=$("osz").value,sl=$("osl").value,v=p.v[sl];
+  if(!pre&&cartHave(p.id,sl,z)<q)return toast(sl+" "+z+" stock nai ("+cartHave(p.id,sl,z)+"). Pre-order dao ba stock barao");
+  cart.push({pid:p.id,name:p.name,slv:sl,size:z,qty:q,price:$("opr").value===""?v.price:+$("opr").value,cost:unit(p,sl),kena:v.cost,vara:p.vara,pack:pk()});
+  $("opr").value="";$("oq").value="1";
+  toast("Item added — add more jerseys or Create Order");render();
+}
+function rmCart(idx){cart.splice(idx,1);render()}
+function loadReorder(id){
+  const o=S.orders.find(x=>x.id==id);cart=o.items.map(c=>({...c}));cinfo={name:o.name,phone:o.phone,addr:o.addr||"",ref:"",notes:o.notes||""};tab="ord";render();scrollTo(0,0);toast("Items loaded — adjust and Create Order");
+}
+function addOrder(){
+  const n=$("on").value.trim();if(!cart.length)return toast("Add at least one item first");if(!n)return toast("Enter customer name");
+  const pre=$("ot").value=="pre";
+  for(const c of cart){if(!pre&&cartHave(c.pid,c.slv,c.size)<0)return toast("Not enough stock for "+c.name)}
+  const dl=$("odl").value===""?($("oa").value=="Dhaka"?80:140):+$("odl").value,cr=$("ocr").value===""?dl:+$("ocr").value,ar=$("oa").value;
+  const items=cart.map(c=>({...c}));
+  const refInput=cinfo.ref.trim().toUpperCase(),match=refInput?custCodes().find(c=>c.code===refInput&&c.phone!==$("oph").value.trim()):null;
+  if(refInput&&!match)return toast("Referral code not recognized — leave blank or check the code");
+  const sub=items.reduce((a,c)=>a+c.qty*c.price,0);
+  const discount=$("od").value!==""?+$("od").value:(match?Math.round(sub*S.refPct/100):0);
+  const notes=$("ont")?$("ont").value.trim():(cinfo.notes||"").trim();
+  const o={id:uid(),date:today(),name:n,phone:$("oph").value.trim(),area:ar,addr:$("oad").value.trim(),notes,items,delivery:dl,courier:cr,discount,ref:match?match.code:"",refPct:match?S.refPct:0,paid:+$("opd").value||0,pay:$("opm").value,status:pre?"Pre-order":"Confirmed"};
+  upd(()=>{
+    S.orders.unshift(o);lastMeta={area:ar,odl:dl,ocr:cr};
+    if(!pre)items.forEach(c=>{const pp=S.products.find(x=>x.id==c.pid);if(pp)pp.v[c.slv].sizes[c.size]=Math.max(0,(pp.v[c.slv].sizes[c.size]||0)-c.qty)});
+  });
+  cinfo={name:"",phone:"",addr:"",ref:"",notes:""};cart=[];
+  toast((match?"Referral code applied ("+S.refPct+"% off) — ":"")+(items.length>1?items.length+"-item order":"Order")+" added ✓");
+}
+function setSt(id,st){
+  upd(()=>{
+    const o=S.orders.find(x=>x.id==id);
+    const mv=s=>o.items.forEach(i=>{const p=S.products.find(x=>x.id==i.pid);if(p&&i.size){const z=p.v[i.slv].sizes;z[i.size]=Math.max(0,(z[i.size]||0)+s*i.qty)}});
+    if(o.status=="Pre-order"&&st=="Confirmed")mv(-1);
+    if(st=="Cancelled"&&o.status!="Pre-order"&&o.status!="Cancelled")mv(1);
+    o.status=st;
+  });
+}
+function full(id){upd(()=>{const o=S.orders.find(x=>x.id==id);o.paid=total(o)})}
+function payIn(id){
+  const v=+$("pay"+id).value;if(!v)return toast("Enter amount");
+  upd(()=>{S.orders.find(x=>x.id==id).paid+=v});toast("Payment recorded ✓");
+}
+const mvS=(o,d)=>o.items.forEach(i=>{const p=S.products.find(x=>x.id==i.pid);if(p&&i.size){const z=p.v[i.slv].sizes;z[i.size]=Math.max(0,(z[i.size]||0)+d*i.qty)}});
+function delO(id){
+  upd(()=>{const o=S.orders.find(x=>x.id==id);if(o&&o.status=="Confirmed")mvS(o,1);S.orders=S.orders.filter(x=>x.id!=id)});
+}
+function waPhone(ph){return "88"+String(ph).replace(/\D/g,"").replace(/^88/,"")}
+function waLink(ph,msg){return "https://api.whatsapp.com/send/?phone="+waPhone(ph)+"&text="+encodeURIComponent(msg)+"&type=phone_number&app_absent=0"}
+async function copyMsg(btn,text){
+  try{
+    if(window.AndroidBridge && window.AndroidBridge.copyToClipboard){
+      window.AndroidBridge.copyToClipboard(text);
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+    toast("Message copied — paste it in WhatsApp ✓");
+  }catch(e){toast("Couldn't copy")}
+}
+function reviewMsg(o){return "Assalamu alaikum "+o.name+"! Thanks for shopping with CrossBar BD. We'd love a quick review or a photo in your new jersey — it really helps our small business grow. Reply here whenever you get a chance. Thank you! 🙏"}
+function confirmMsg(o){
+  const lines=o.items.map(i=>"- "+i.name+" ("+i.slv+", "+i.size+") x"+i.qty).join("\n");
+  const notePart = o.notes ? "\nNote: " + o.notes : "";
+  return "Assalamu alaikum "+o.name+"! Your order from CrossBar BD is confirmed:\n\n"+lines+"\nTotal: "+tk(total(o))+"\nDelivery area: "+o.area+(o.addr?" - "+o.addr:"")+notePart+"\n\nThank you for choosing CrossBar BD!";
+}
+
+// Bulk WhatsApp Messaging
+let selectedCustPhones = new Set();
+let bulkMsgType = "promo";
+let bulkMsgCustom = "";
+let currentCustomerList = [];
+
+const BULK_TEMPLATES = {
+  promo: "Assalamu alaikum {name}! 🔥 New season Club & National Jerseys are now in stock at CrossBar BD! Premium Player and Fan editions available with high-quality printing. Reply here to place your order or browse our collection! ⚽",
+  due: "Assalamu alaikum {name}! Hope you are doing well. This is a gentle reminder from CrossBar BD regarding your outstanding due of {due} for your jersey order. Kindly send the payment when convenient. Thank you! 🙏",
+  reorder: "Assalamu alaikum {name}! Greetings from CrossBar BD. We hope you loved your jersey! If you or your friends need any new season kits, feel free to let us know. We have fresh stock available! 😊",
+  vip: "Assalamu alaikum {name}! As a valued VIP customer at CrossBar BD, here is your exclusive referral discount code: {code} for your next jersey order! Thank you for supporting our business! ⭐"
+};
+
+function getBulkTemplateText(){
+  if(bulkMsgType === 'custom') return bulkMsgCustom || BULK_TEMPLATES.promo;
+  return BULK_TEMPLATES[bulkMsgType] || BULK_TEMPLATES.promo;
+}
+
+function formatCustMsg(template, c){
+  return template
+    .replace(/\{name\}/g, c.name || "Customer")
+    .replace(/\{due\}/g, c.due ? tk(c.due) : "৳0")
+    .replace(/\{spent\}/g, tk(c.spent || 0))
+    .replace(/\{code\}/g, c.code || (c.name ? c.name.replace(/[^a-zA-Z]/g,"").slice(0,4).toUpperCase()+"10" : "CROSSBAR10"));
+}
+
+function toggleCustSelect(phone){
+  if(!phone) return;
+  if(selectedCustPhones.has(phone)) selectedCustPhones.delete(phone);
+  else selectedCustPhones.add(phone);
+  render();
+}
+
+function selectCustFilter(type){
+  if(type === 'all'){
+    selectedCustPhones = new Set(currentCustomerList.map(c => c.phone).filter(Boolean));
+  } else if(type === 'vip'){
+    selectedCustPhones = new Set(currentCustomerList.filter(c => c.vip).map(c => c.phone).filter(Boolean));
+  } else if(type === 'due'){
+    selectedCustPhones = new Set(currentCustomerList.filter(c => c.due > 0).map(c => c.phone).filter(Boolean));
+  } else if(type === 'repeat'){
+    selectedCustPhones = new Set(currentCustomerList.filter(c => c.orders > 1).map(c => c.phone).filter(Boolean));
+  } else if(type === 'clear'){
+    selectedCustPhones.clear();
+  }
+  render();
+}
+
+function setBulkMsgType(type){
+  bulkMsgType = type;
+  if(type !== 'custom') bulkMsgCustom = BULK_TEMPLATES[type] || "";
+  render();
+}
+
+function setBulkMsgCustom(val){
+  bulkMsgCustom = val;
+  bulkMsgType = "custom";
+}
+
+function copyBulkNumbers(){
+  const selectedList = currentCustomerList.filter(c => selectedCustPhones.has(c.phone));
+  const phones = selectedList.map(c => c.phone).filter(Boolean).join(", ");
+  if(!phones) return toast("No customers selected");
+  copyMsg(null, phones);
+  toast("Copied " + selectedList.length + " phone numbers ✓");
+}
+
+function copyBulkTemplateText(){
+  const text = getBulkTemplateText();
+  copyMsg(null, text);
+}
+
+const INV_CSS=`
+*{box-sizing:border-box}
+.sheet{width:210mm;min-height:99mm;margin:0 auto;background:#fff;padding:9mm 11mm;display:flex;flex-direction:column;font-family:'Inter',system-ui,sans-serif;color:#1a1a1a}
+.hd{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:8px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none;background:#0a0f1e}
+.brand h1{font-family:'Playfair Display',serif;font-size:17px;margin:0;letter-spacing:.3px}
+.brand .tag{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:#777;margin-top:1px}
+.inv-meta{text-align:right;font-size:9.5px;color:#555;line-height:1.5}
+.inv-meta b{color:#111;font-size:11px}
+.info{display:flex;justify-content:space-between;gap:16px;font-size:9.5px;color:#444;margin-bottom:8px;line-height:1.5}
+.info b{color:#111}
+.sheet table{width:100%;border-collapse:collapse;font-size:9.5px;flex:1}
+.sheet th{text-align:left;font-size:8px;letter-spacing:.8px;text-transform:uppercase;color:#888;border-bottom:1px solid #ddd;padding:3px 4px}
+.sheet td{padding:5px 4px;border-bottom:1px solid #eee;vertical-align:top}
+.sub{font-size:8px;color:#888}
+.c{text-align:center}.r{text-align:right}
+.totals{margin-left:auto;width:52%;font-size:9.5px;margin-top:4px}
+.totals div{display:flex;justify-content:space-between;padding:2px 0}
+.totals .grand{border-top:1.5px solid #111;margin-top:3px;padding-top:4px;font-size:13px;font-weight:700;font-family:'Playfair Display',serif}
+.ft{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #eee;padding-top:6px;font-size:8.5px;color:#777}
+.ft b{color:#16a34a}`;
+
+function invBody(o){
+  const logo="icons/icon-192.png", bizPhone=S.biz&&S.biz.phone||"",
+  rows=o.items.map(i=>`<tr><td>${esc(i.name)}<div class="sub">${i.slv} · Size ${i.size}</div></td><td class="c">${i.qty}</td><td class="r">${tk(i.price)}</td><td class="r">${tk(i.price*i.qty)}</td></tr>`).join("");
+  return`<div class="sheet">
+<div class="hd"><div class="brand"><img src="${logo}" alt=""><div><h1>CrossBar BD</h1><div class="tag">Wear The Passion. Live The Game.</div></div></div><div class="inv-meta"><b>INVOICE</b><br>${o.date}${bizPhone?`<br>Hotline: ${esc(bizPhone)}`:""}</div></div>
+<div class="info"><div><b>Bill To</b><br>${esc(o.name)}<br>${esc(o.phone)}</div><div style="text-align:right"><b>Ship To</b><br>${esc(o.addr||o.area)}<br>${esc(o.area)}</div></div>
+<table><tr><th>Item</th><th class="c">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr>${rows}</table>
+${o.notes?`<div class="sub" style="margin:4px 0 2px;font-style:italic;color:#555"><b>Special Instructions:</b> ${esc(o.notes)}</div>`:""}
+<div class="totals"><div><span>Delivery</span><span>${tk(o.delivery)}</span></div>${o.discount?`<div><span>Discount${o.ref?` (code ${esc(o.ref)})`:""}</span><span>-${tk(o.discount)}</span></div>`:""}<div class="grand"><span>Total</span><span>${tk(total(o))}</span></div><div><span>Paid</span><span>${tk(o.paid)}</span></div>${dueOf(o)?`<div><b>Due</b><b>${tk(dueOf(o))}</b></div>`:""}</div>
+<div class="ft"><span>Thank you for shopping with <b>CrossBar BD</b>!</span>${bizPhone?`<span>Questions? Call ${esc(bizPhone)}</span>`:""}</div>
+</div>`;
+}
+
+function invoice(id){return invoiceAsImage(id)}
+
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onloadend=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+// Android native bridge & Web download integration
+async function saveFile(name,data,type){
+  const blob = data instanceof Blob ? data : new Blob([data],{type: type || "application/octet-stream"});
+  if(window.AndroidBridge){
+    try{
+      const b64 = await blobToBase64(blob);
+      if((type && type.startsWith("image/")) || name.endsWith(".png") || name.endsWith(".jpg")){
+        if(window.AndroidBridge.saveImageToGallery){
+          window.AndroidBridge.saveImageToGallery(name, b64);
+          return;
+        }
+      }
+      if(window.AndroidBridge.saveFile){
+        window.AndroidBridge.saveFile(name, b64, type || "application/octet-stream");
+        return;
+      }
+    }catch(e){console.warn("AndroidBridge save failed:", e)}
+  }
+  try{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},2000);
+  }catch(e){
+    toast("Download failed: "+e.message);
+  }
+}
+
+async function invoiceAsImage(id){
+  const o=S.orders.find(x=>x.id==id), cap=$("invCap");
+  if(typeof html2canvas==="undefined")return toast("Couldn't load image tool — check connection");
+  cap.innerHTML=`<style>#invCap{box-shadow:none;margin:0}${INV_CSS.replace(/\.sheet/g,"#invCap .sheet").replace(/\.hd/g,"#invCap .hd").replace(/\.brand/g,"#invCap .brand").replace(/\.inv-meta/g,"#invCap .inv-meta").replace(/\.info/g,"#invCap .info").replace(/\.sub/g,"#invCap .sub").replace(/\.c\{/g,"#invCap .c{").replace(/\.r\{/g,"#invCap .r{").replace(/\.totals/g,"#invCap .totals").replace(/\.ft/g,"#invCap .ft")}</style>`+invBody(o);
+  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+  await new Promise(res=>setTimeout(res,120));
+  try{
+    const canvas=await html2canvas(cap.querySelector(".sheet"),{scale:2,backgroundColor:"#ffffff"});
+    canvas.toBlob(async blob=>{
+      if(!blob)return toast("Couldn't create invoice image");
+      const filename="invoice-"+o.name.replace(/[^a-z0-9]+/gi,"-")+"-"+o.date+".png";
+      const b64 = await blobToBase64(blob);
+      if(window.AndroidBridge && window.AndroidBridge.saveImageToGallery){
+        try{
+          window.AndroidBridge.saveImageToGallery(filename, b64);
+          toast("🖼️ Invoice saved to Phone Gallery! ✓");
+          return;
+        }catch(e){console.warn("saveImageToGallery failed:", e)}
+      }
+      await saveFile(filename,blob,"image/png");
+      toast("Invoice saved ✓");
+    },"image/png");
+  }catch(e){
+    toast("Couldn't generate invoice image");
+  }finally{
+    cap.innerHTML="";
+  }
+}
+
+async function shareInvoice(id){
+  const o=S.orders.find(x=>x.id==id), cap=$("invCap");
+  if(typeof html2canvas==="undefined")return toast("Couldn't load image tool");
+  cap.innerHTML=`<style>#invCap{box-shadow:none;margin:0}${INV_CSS.replace(/\.sheet/g,"#invCap .sheet").replace(/\.hd/g,"#invCap .hd").replace(/\.brand/g,"#invCap .brand").replace(/\.inv-meta/g,"#invCap .inv-meta").replace(/\.info/g,"#invCap .info").replace(/\.sub/g,"#invCap .sub").replace(/\.c\{/g,"#invCap .c{").replace(/\.r\{/g,"#invCap .r{").replace(/\.totals/g,"#invCap .totals").replace(/\.ft/g,"#invCap .ft")}</style>`+invBody(o);
+  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+  await new Promise(res=>setTimeout(res,120));
+  try{
+    const canvas=await html2canvas(cap.querySelector(".sheet"),{scale:2,backgroundColor:"#ffffff"});
+    canvas.toBlob(async blob=>{
+      if(!blob)return toast("Couldn't create invoice image");
+      const filename="invoice-"+o.name.replace(/[^a-z0-9]+/gi,"-")+".png";
+      const msg=confirmMsg(o);
+
+      if(window.AndroidBridge){
+        try{
+          const b64 = await blobToBase64(blob);
+          if(window.AndroidBridge.saveImageToGallery){
+            window.AndroidBridge.saveImageToGallery(filename, b64);
+          }
+          if(window.AndroidBridge.shareImage){
+            window.AndroidBridge.shareImage(filename, b64, msg, "image/png");
+            return;
+          }
+        }catch(e){console.warn("AndroidBridge share failed:", e)}
+      }
+
+      const file=new File([blob],filename,{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file],text:msg,title:"CrossBar BD Invoice"});
+          return;
+        }catch(e){if(e&&e.name==="AbortError")return}
+      }
+      await saveFile(filename,blob,"image/png");
+      toast("Invoice saved to Gallery — attach it in WhatsApp");
+    },"image/png");
+  }catch(e){
+    toast("Couldn't generate invoice image");
+  }finally{
+    cap.innerHTML="";
+  }
+}
+
+function saveEd(id){
+  upd(()=>{
+    const o=S.orders.find(x=>x.id==id);
+    o.name=$("xn").value.trim()||o.name;o.phone=$("xph").value.trim();o.area=$("xar").value;o.addr=$("xad").value.trim();
+    if(o.items.length==1)o.items[0].price=+$("xpr").value||0;
+    o.delivery=+$("xdl").value||0;o.courier=+$("xcr").value||0;o.discount=+$("xdi").value||0;o.paid=+$("xpd").value||0;
+    o.notes=$("xnt")?$("xnt").value.trim():(o.notes||"");
+    ed=null;
+  });
+  toast("Order updated ✓");
+}
+function setP(id,f,v){const p=S.products.find(x=>x.id==id);p[f]=(f=="name"||f=="team")?(v.trim()||p[f]||""):(f=="img"?v:(+v||0));save();render();toast("Updated ✓")}
+function setAd(id,f,v){S.ads.find(x=>x.id==id)[f]=+v||0;save();render();toast("Updated ✓")}
+
+const editCard=o=>{
+  const i=o.items[0],multi=o.items.length>1;
+  return`<div class="card"><b>✏️ Edit Order</b><div class="sm">${multi?o.items.map(x=>esc(x.name)+" ×"+x.qty).join(", "):esc(i.name)+" · "+i.slv+" "+(i.size||"")+" ×"+i.qty}</div><div class="f" style="margin-top:8px"><input id="xn" value="${esc(o.name)}" placeholder="Customer Name"><input id="xph" value="${esc(o.phone)}" placeholder="Phone"><select id="xar"><option${o.area=="Dhaka"?" selected":""}>Dhaka</option><option${o.area!="Dhaka"?" selected":""}>Outside Dhaka</option></select><input id="xad" value="${esc(o.addr||"")}" placeholder="Full Address"><div><div class="k">Order Notes / Instructions</div><textarea id="xnt" placeholder="Special instructions, remarks, customer requests..." rows="2" style="font:inherit;padding:8px;border-radius:8px;border:1px solid var(--b);background:var(--c);color:var(--t);width:100%;resize:vertical">${esc(o.notes||"")}</textarea></div><div class="grid">${multi?"":'<div><div class="k">Price / pc</div><input id="xpr" type="number" value="'+i.price+'"></div>'}<div><div class="k">Delivery (Paid by Customer)</div><input id="xdl" type="number" value="${o.delivery}"></div><div><div class="k">Paid to Courier</div><input id="xcr" type="number" value="${o.courier||0}"></div><div><div class="k">Discount</div><input id="xdi" type="number" value="${o.discount||0}"></div><div><div class="k">Amount Paid</div><input id="xpd" type="number" value="${o.paid}"></div></div></div><div class="sm">To change size, quantity or items, cancel this order and create a new one.</div><div style="display:flex;gap:6px;margin-top:8px"><button onclick="saveEd('${o.id}')">Save</button><button class="s" onclick="ed=null;render()">Bondho</button></div></div>`;
+};
+
+function clrC(){upd(()=>S.orders=S.orders.filter(o=>o.status!="Cancelled"))}
+function addAd(){const sp=+$("as").value;if(!sp)return toast("Enter spend amount");upd(()=>S.ads.unshift({id:uid(),date:$("ad").value,spend:sp,msgs:+$("am").value||0,ords:+$("ao").value||0}))}
+function delAd(id){upd(()=>S.ads=S.ads.filter(x=>x.id!=id))}
+function addExp(){const a=+$("ea").value;if(!a)return toast("Enter amount");upd(()=>S.exp.unshift({id:uid(),date:$("ed").value,cat:$("ec").value,amt:a,note:$("en").value.trim()}))}
+function delE(id){upd(()=>S.exp=S.exp.filter(x=>x.id!=id))}
+const R=(l,v,cl)=>`<div class="row"><span>${l}</span><b class="${cl||""}">${v}</b></div>`;
+
+function bkp(){saveFile("crossbar-backup-"+today()+".json",JSON.stringify(S),"application/json");toast("Preparing backup file")}
+function rst(inp){
+  const f=inp.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.products||!d.orders)throw 0;upd(()=>{S=Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0}},d)});toast("Data restored ✓")}catch(e){toast("Invalid file")}};
+  rd.readAsText(f);
+}
+
+async function dlCsv(){
+  try{
+    const q=x=>'"'+String(x??"").replace(/"/g,'""')+'"',
+    rows=[["Date","Customer","Phone","Area","Address","Notes","Payment","Jersey","Sleeve","Size","Qty","Price","Delivery","Discount","Order Total","Paid","Baki","Jersey Cost","Courier","Status"]];
+    S.orders.forEach(o=>{
+      o.items.forEach((i,idx)=>{
+        rows.push([o.date,o.name,'="'+o.phone+'"',o.area,o.addr,idx==0?(o.notes||""):"",o.pay||"",i.name,i.slv,i.size,i.qty,i.price,idx==0?o.delivery:0,idx==0?o.discount:0,idx==0?total(o):"",idx==0?o.paid:"",idx==0?dueOf(o):"",i.cost*i.qty,idx==0?(o.courier||0):0,o.status]);
+      });
+    });
+    saveFile("crossbar-orders-"+today()+".csv","\ufeff"+rows.map(r=>r.map(q).join(",")).join("\n"),"text/csv");
+  }catch(e){toast("Download failed")}
+}
+
+const sumS=p=>SL.map(sl=>{const z=SZ.filter(z=>p.v[sl].sizes[z]>0).map(z=>z+" "+p.v[sl].sizes[z]).join(", ");return z?sl+": "+z:""}).filter(Boolean).join(" | ")||"Stock nai";
+function tg(id){so.has(id)?so.delete(id):so.add(id);$("slist").innerHTML=stkList()}
+
+const pcard=p=>{
+  const o=so.has(p.id);
+  return`<div class="card"><div class="row" style="border:0;padding:0;cursor:pointer" onclick="tg('${p.id}')">${p.img?`<img src="${p.img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none;margin-right:8px">`:""}<span><b>${esc(p.name)}</b> <span class="tag">${p.team||"team ?"}</span><br><span class="sm">${tot(p)} pcs · ${sumS(p)}</span></span><span>${o?"▲":"▼"}</span></div>${o?`<div style="margin-top:8px;display:flex;gap:10px;align-items:center">${p.img?`<img src="${p.img}" style="width:64px;height:64px;border-radius:10px;object-fit:cover">`:'<div class="sm">No photo yet</div>'}<div style="flex:1"><input type="file" accept="image/*" id="img${p.id}" style="display:none" onchange="setImg('${p.id}',this)"><button class="s" onclick="document.getElementById('img${p.id}').click()">📷 ${p.img?"Change":"Add"} Photo</button>${p.img?` <button class="d xs" onclick="sure(this,()=>setP('${p.id}','img',''))">Remove</button>`:""}</div></div><div class="grid" style="margin-top:8px"><div><div class="k">Category</div><select onchange="setP('${p.id}','team',this.value)"><option value=""${p.team?"":" selected"} disabled>Select</option><option${p.team=="National"?" selected":""}>National</option><option${p.team=="Club"?" selected":""}>Club</option></select></div><div><div class="k">Product Name</div><input value="${esc(p.name)}" onchange="setP('${p.id}','name',this.value)"></div></div><div class="grid" style="margin-top:6px"><div><div class="k">Freight / pc</div><input type="number" value="${Math.round(p.vara*100)/100}" onchange="setP('${p.id}','vara',this.value)"></div><div><div class="k">Total Investment (Cost + Freight)</div><input type="number" value="${Math.round(p.inv)}" onchange="setP('${p.id}','inv',this.value)"></div></div>${SL.map(sl=>vblock(p,sl)).join("")}<button class="d" style="width:100%;margin-top:8px" onclick="sure(this,()=>delP('${p.id}'))">× Delete this jersey</button>`:""}</div>`;
+};
+
+function setImg(id,inp){
+  const f=inp.files[0];if(!f)return;if(f.size>4*1024*1024)return toast("Image too large — pick a smaller photo");dirty=true;const img=new Image(),rd=new FileReader();
+  rd.onload=()=>{img.onload=()=>{const c=document.createElement("canvas"),mx=300,sc=Math.min(1,mx/Math.max(img.width,img.height));c.width=img.width*sc;c.height=img.height*sc;c.getContext("2d").drawImage(img,0,0,c.width,c.height);const data=c.toDataURL("image/jpeg",0.7);upd(()=>{S.products.find(x=>x.id==id).img=data})};img.src=rd.result};
+  rd.readAsDataURL(f);
+}
+
+function stkList(){
+  const q=stq.trim().toLowerCase(),L=S.products.filter(p=>(stf=="all"||p.team==stf)&&(!q||(p.name+" "+(p.team||"")+" "+(p.kind||"")).toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
+  return`<div class="sm" style="margin-bottom:6px">${L.length} items · ${L.reduce((a,p)=>a+tot(p),0)} pcs</div>`+(L.map(pcard).join("")||'<div class="card sm">No items found</div>');
+}
+
+async function pull(){
+  if(!doc||dirty)return;
+  const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))return;
+  try{
+    const r2=await doc.get();if(dirty||!r2.exists)return;
+    const prev=S,old=JSON.stringify(S);
+    S=Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0}},JSON.parse(JSON.stringify(r2.data())));
+    norm();
+    if(dirty){S=prev;return}
+    if(JSON.stringify(S)!==old){render();toast("Synced latest data from cloud ✓")}else S=prev;
+  }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
+window.addEventListener("focus",pull);
+
+function custCodes(){
+  const by={};S.orders.filter(o=>o.status!="Cancelled").forEach(o=>{const k=(o.phone||o.name).trim(),b=by[k]=by[k]||{name:o.name,phone:o.phone,spent:0};b.spent+=total(o);b.name=o.name});
+  const L=Object.values(by).sort((a,b)=>b.spent-a.spent);
+  L.forEach((c,idx)=>{c.vip=idx<3&&c.spent>0;c.code=(c.name.replace(/[^a-zA-Z]/g,"").slice(0,4)+String(c.phone).replace(/\D/g,"").slice(-3)).toUpperCase()});
+  return L;
+}
+function saveRefPct(){upd(()=>S.refPct=Math.max(0,+$("rfp").value||0));toast("Referral setting saved ✓")}
+function saveMonthlyGoal(){
+  const el = $("monthlyGoalInput");
+  const val = el ? Math.max(0, +el.value || 0) : 0;
+  upd(() => {
+    S.monthlyGoal = val;
+  });
+  toast("Monthly sales goal updated to " + tk(val) + " ✓");
+}
+function tabs(){$("nav").innerHTML=TABS.map(([k,l])=>`<button class="${tab==k?"on":""}" onclick="tab='${k}';render();scrollTo(0,0)">${l}</button>`).join("")}
+
+function calc(){
+  const live=S.orders.filter(o=>o.status!="Cancelled"),sold=live.filter(o=>o.status!="Pre-order"),sp=sold.reduce((a,o)=>a+o.items.reduce((x,i)=>x+i.qty,0),0),rev=sold.reduce((a,o)=>a+total(o),0),cg=sold.reduce((a,o)=>a+cogs(o),0),due=live.reduce((a,o)=>a+dueOf(o),0),spend=S.ads.reduce((a,x)=>a+x.spend,0),ao=S.ads.reduce((a,x)=>a+x.ords,0),am=S.ads.reduce((a,x)=>a+x.msgs,0),opx=S.exp.filter(e=>EX.includes(e.cat)).reduce((a,e)=>a+e.amt,0),courier=sold.reduce((a,o)=>a+(o.courier||0),0),adsPer=sp?spend/sp:0,net=rev-cg-opx-courier-spend,inv=S.products.reduce((a,p)=>a+SL.reduce((x,sl)=>x+vp(p,sl)*unit(p,sl),0),0),invest=S.products.reduce((a,p)=>a+p.inv,0)+S.pkg.t+opx+courier+spend;
+  return{live,sold,sp,rev,cg,due,spend,ao,am,opx,courier,adsPer,net,inv,invest};
+}
+
+function vblock(p,sl){
+  const v=p.v[sl],c=sl[0],ap=calc().adsPer,ld=unit(p,sl)+ap,lav=v.price-ld;
+  return`<div class="hl"><b>${sl} sleeve</b> · ${vp(p,sl)} pcs
+<div class="grid" style="margin:6px 0"><div><div class="k">Buying Price / pc</div><input type="number" value="${v.cost}" onchange="setV('${p.id}','${sl}','cost',this.value)"></div><div><div class="k">Selling Price</div><input type="number" value="${v.price}" onchange="setV('${p.id}','${sl}','price',this.value)"></div></div>
+${v.cost?`<div>Kena ${tk(v.cost)} + Vara ${tk(p.vara)} + Packaging ${tk(pk())} + Ads ${tk(ap)} = <b>${tk(ld)}</b><br>Bikri ${tk(v.price)} − ${tk(ld)} = Lav <b class="${lav<0?"neg":"pos"}">${tk(lav)}</b> (${v.price?Math.round(lav/v.price*100):0}%)</div>`:'<div class="sm">Add a buying price to see profit</div>'}
+<div class="grid5" style="margin-top:8px">${SZ.map(z=>{
+  const q = v.sizes[z] || 0;
+  const isZero = q === 0;
+  const isOne = q === 1;
+  const boxStyle = isZero 
+    ? 'background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.38);border-radius:8px' 
+    : (isOne ? 'background:rgba(234,179,8,0.14);border:1px solid rgba(234,179,8,0.45);border-radius:8px' : 'background:var(--c);border:1px solid var(--b);border-radius:8px');
+  return `<div style="text-align:center;padding:4px 2px;${boxStyle}">
+    <div class="k" style="font-size:11px">${z}</div>
+    <b style="font-size:15px" class="${q<=1?'low':''}">${q}</b>
+    ${isZero ? '<div style="font-size:8.5px;color:var(--neg);font-weight:700;line-height:1">OUT</div>' : (isOne ? '<div style="font-size:8.5px;color:#ca8a04;font-weight:700;line-height:1">LOW (1)</div>' : '<div style="font-size:8.5px;color:var(--m);line-height:1">in stock</div>')}
+    <div style="margin-top:3px"><button class="s xs" onclick="adj('${p.id}','${sl}','${z}',-1)">−</button><button class="s xs" onclick="adj('${p.id}','${sl}','${z}',1)">+</button></div>
+  </div>`;
+}).join("")}</div></div>`;
+}
+
+function render(){
+  tabs();norm();const c=calc(),{live,sold}=c;let h="";
+  if(tab=="dash"){
+    const tdy=sold.filter(o=>o.date==today());
+    const importBanner=S.histImported?`<div class="card"><b>📥 Purono order import kora ache</b><div class="sm" style="margin:6px 0">Purono order add kora hoyeche. Kono bhul thakle (jemon discount vul hishab), niche theke shorie abar notun kore add korte paro.</div><button class="d" onclick="sure(this,removeHist)">Purono import shorie dao</button></div>`:`<div class="card" style="border-color:var(--a)"><b>📥 Purono bikri-r tottho pawa geche</b><div class="sm" style="margin:6px 0">Tomar Excel sheet theke 22-ta purono order (Forhad, Mehedi, Imran, Nihal, Sakil, Sabbir etc. — Apr-Jun 2026) paowa geche, jar modhye Sakil ar Sabbir-er 4-4-ta jersey ekta-ekta order-e combine kora. Ekbar chapleI shob eke add hobe, tomar ekhon-er stock/product-e kono change hobe na.</div><button onclick="sure(this,importHist)">+ Add Purono Order (ekbar-i hobe)</button></div>`;
+    const days=[...Array(7)].map((_,k)=>{const d=new Date();d.setDate(d.getDate()-(6-k));return d.toISOString().slice(0,10)});
+    const dsales=days.map(d=>sold.filter(o=>o.date==d).reduce((a,o)=>a+total(o),0));
+    const mx=Math.max(...dsales,1);
+    const chart=`<div class="card"><b>Last 7 Days</b><div style="display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:10px">${dsales.map((v,k)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:100%;background:var(--a);border-radius:4px 4px 0 0;height:${v?Math.max(4,Math.round(v/mx*54)):2}px" title="${tk(v)}"></div><span class="sm" style="font-size:9px">${days[k].slice(5).replace("-","/")}</span></div>`).join("")}</div></div>`;
+    h=chart+importBanner+`<div class="grid"><div class="card"><div class="k">Total Sales</div><div class="v">${tk(c.rev)}</div></div><div class="card"><div class="k">Net profit</div><div class="v ${c.net<0?"neg":"pos"}">${tk(c.net)}</div></div><div class="card"><div class="k">Today</div><div class="v">${tk(tdy.reduce((a,o)=>a+total(o),0))}</div></div><div class="card"><div class="k">Amount Due</div><div class="v ${c.due?"low":""}">${tk(c.due)}</div></div><div class="card"><div class="k">Units Sold / Pre-orders</div><div class="v">${c.sp} / ${live.filter(o=>o.status=="Pre-order").length}</div></div><div class="card"><div class="k">Stock Value (Cost)</div><div class="v">${tk(c.inv)}</div></div><div class="card"><div class="k">Ad Spend</div><div class="v">${tk(c.spend)}</div></div><div class="card"><div class="k">Cost per Order (Ads)</div><div class="v">${c.ao?tk(c.spend/c.ao):"-"}</div></div></div>
+<div class="card"><b>Low Stock (≤2 total)</b>${S.products.filter(p=>tot(p)<=2).map(p=>`<div class="row"><span>${esc(p.name)}</span><b class="low">${tot(p)}</b></div>`).join("")||'<div class="sm">All good 👍</div>'}</div>
+<div class="card"><b>Customers with Due</b>${live.filter(o=>dueOf(o)>0).slice(0,6).map(o=>`<div class="row"><span>${esc(o.name)}<br><span class="sm">${esc(o.phone)}</span></span><b>${tk(dueOf(o))}</b></div>`).join("")||'<div class="sm">No outstanding dues</div>'}</div>
+<div class="card"><b>📘 How This App Works</b><ol class="sm" style="padding-left:18px;margin:8px 0 0;line-height:1.6"><li><b>Stock:</b> notun jersey ante Half/Full alada kena dam, size wise pcs, ar pura batch-er vara likho. Vara nijei prottek pc-te bhag hoye jay.</li><li><b>Stock (upore):</b> packaging koto taka-y koto pcs kinle ta likho, per pc auto hishab hobe.</li><li><b>Orders:</b> order dile oi Half/Full + size-er stock kombe, cost auto lagbe.</li><li><b>Baki:</b> jara taka dey nai tader hishab ar reminder.</li><li><b>Ads / Profit:</b> ad spend ar Courier/Other khoroj din-e din likho. Ads-er khoroj bikri hoya pc-r upor bhag hoy.</li></ol><div class="sm" style="margin-top:8px"><b>Lav per pc = Bikri dam − (Kena + Vara + Packaging + Ads)</b></div></div>
+<div class="card"><b>💾 Data Backup & Restore</b><div class="sm" style="margin:6px 0">Back up weekly. If you switch phones or PC, Restore brings everything back.</div><div class="grid"><button onclick="bkp()">Backup download</button><button class="s" style="width:100%" onclick="sure(this,()=>$('rf').click())">Restore</button></div><input id="rf" type="file" accept=".json,application/json" style="display:none" onchange="rst(this)"></div>`;
+  }
+  if(tab=="cust"){
+    const by={};
+    S.orders.forEach(o=>{
+      const k=(o.phone||o.name).trim();
+      const b=by[k]=by[k]||{name:o.name,phone:o.phone,orders:0,spent:0,due:0,last:o.date,orderList:[]};
+      b.orderList.push(o);
+      if(o.status!="Cancelled"){
+        b.orders++;
+        b.spent+=total(o);
+        b.due+=dueOf(o);
+        if(!b.last||o.date>b.last) b.last=o.date;
+      }
+      b.name=o.name;
+    });
+    Object.values(by).forEach(b=>{
+      b.orderList.sort((x,y)=>(y.date||"").localeCompare(x.date||""));
+    });
+    const codes=custCodes(),cm=Object.fromEntries(codes.map(x=>[x.phone,x.code]));
+    const L=Object.values(by).sort((a,b)=>b.spent-a.spent);
+    L.forEach((c,idx)=>{
+      c.vip=idx<3&&c.spent>0;
+      c.code=cm[c.phone]||"";
+      c.refs=S.orders.filter(o=>o.status!="Cancelled"&&o.ref===c.code).length;
+    });
+    currentCustomerList = L;
+    const selectedList = L.filter(c => selectedCustPhones.has(c.phone));
+    const activeTemplate = getBulkTemplateText();
+
+    h=`<div class="card"><div class="k">Total Customers</div><div class="v">${L.length}</div></div>
+
+<!-- Bulk WhatsApp Messaging Card -->
+<details class="card" ${selectedCustPhones.size > 0 ? "open" : ""} style="border-color:var(--a);background:linear-gradient(180deg,var(--c),rgba(22,163,74,0.03))">
+  <summary style="cursor:pointer;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;user-select:none">
+    <span style="display:flex;align-items:center;gap:6px">
+      <span>📢 Bulk WhatsApp Message</span>
+    </span>
+    <span class="tag" style="${selectedCustPhones.size>0?'background:var(--a);color:var(--btnTxt)':'background:var(--b);color:var(--t)'}">
+      ${selectedCustPhones.size} Selected
+    </span>
+  </summary>
+
+  <div style="margin-top:10px">
+    <div class="sm" style="margin-bottom:6px;font-weight:600">1. Select Target Customers:</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="s xs" style="${selectedCustPhones.size===L.filter(c=>c.phone).length&&L.length>0?'background:var(--a);color:var(--btnTxt);font-weight:700':''}" onclick="selectCustFilter('all')">Select All (${L.filter(c=>c.phone).length})</button>
+      <button class="s xs" onclick="selectCustFilter('vip')">⭐ VIPs (${L.filter(c=>c.vip).length})</button>
+      <button class="s xs" onclick="selectCustFilter('due')">⚠️ With Due (${L.filter(c=>c.due>0).length})</button>
+      <button class="s xs" onclick="selectCustFilter('repeat')">🔁 Repeat (${L.filter(c=>c.orders>1).length})</button>
+      ${selectedCustPhones.size>0?`<button class="d xs" onclick="selectCustFilter('clear')">✕ Clear</button>`:''}
+    </div>
+
+    <div class="sm" style="margin-bottom:6px;font-weight:600">2. Choose Message Template:</div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+      ${[
+        ["promo", "🔥 Promotional Offer"],
+        ["due", "⏳ Due Reminder"],
+        ["reorder", "🔁 Check-in / Reorder"],
+        ["vip", "⭐ VIP Discount"],
+        ["custom", "✏️ Custom Text"]
+      ].map(([type, label]) => `
+        <button class="s xs" style="${bulkMsgType===type?'background:var(--a);color:var(--btnTxt);font-weight:700':''}" onclick="setBulkMsgType('${type}')">${label}</button>
+      `).join("")}
+    </div>
+
+    <textarea id="bulkTemplateInput" rows="3" oninput="setBulkMsgCustom(this.value)" placeholder="Type message template... Use {name}, {due}, {code}" style="font:inherit;font-size:12px;padding:8px 10px;border-radius:8px;border:1px solid var(--b);background:var(--c);color:var(--t);width:100%;resize:vertical;line-height:1.4">${esc(activeTemplate)}</textarea>
+    <div class="sm" style="font-size:11px;margin:4px 0 10px;color:var(--m)">
+      💡 Tags auto-replace per customer: <b>{name}</b> (Customer Name), <b>{due}</b> (Due Amount), <b>{code}</b> (VIP Promo Code)
+    </div>
+
+    ${selectedCustPhones.size > 0 ? `
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="s xs" onclick="copyBulkTemplateText()" style="flex:1">📋 Copy Template</button>
+        <button class="s xs" onclick="copyBulkNumbers()" style="flex:1">📞 Copy Phones (${selectedCustPhones.size})</button>
+      </div>
+
+      <div class="sm" style="font-weight:600;margin-bottom:6px">3. Send to Selected (${selectedCustPhones.size}):</div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;padding-right:2px">
+        ${selectedList.map(c => {
+          const msg = formatCustMsg(activeTemplate, c);
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:6px 10px;font-size:12px">
+              <div style="min-width:0;flex:1">
+                <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                  ${esc(c.name)} ${c.due ? `<span class="low" style="font-size:11px">(Due: ${tk(c.due)})</span>` : ''}
+                </div>
+                <div class="sm" style="font-size:10px">${esc(c.phone)}</div>
+              </div>
+              <a class="wa xs" target="_blank" rel="noopener" style="padding:4px 9px;font-size:11px;white-space:nowrap;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:3px" href="${waLink(c.phone, msg)}">
+                💬 Send
+              </a>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `
+      <div class="sm" style="background:var(--bg);padding:8px 10px;border-radius:8px;color:var(--m);text-align:center">
+        👆 Select audience using the buttons above or tick the checkbox beside any customer below!
+      </div>
+    `}
+  </div>
+</details>
+
+<div class="card"><b>🏷️ Referral Discount Setting</b><div class="sm" style="margin:6px 0">When a customer enters a VIP's code at checkout, this % discount auto-applies. Change it anytime — past orders keep whatever % was active then.</div><div style="display:flex;gap:8px;align-items:center"><input id="rfp" type="number" value="${S.refPct}" style="width:80px" min="0" max="100"><span>%</span><button style="width:auto" onclick="saveRefPct()">Save</button></div></div>
+<h2>Customer List (by total spend)</h2>${L.map(c=>`<div class="card"><div class="row" style="border:0;padding:0;align-items:flex-start"><div style="display:flex;align-items:flex-start;gap:8px;flex:1"><input type="checkbox" ${selectedCustPhones.has(c.phone)?"checked":""} onchange="toggleCustSelect('${esc(c.phone)}')" style="width:18px;height:18px;margin-top:2px;cursor:pointer;flex:none;accent-color:var(--a)" title="Select for Bulk Message"><div><b>${esc(c.name)}</b>${c.vip?' <span class="tag" style="background:#f2b70522;color:#ca8a04">⭐ VIP</span>':""}${c.orders>1?` <span class="tag">Repeat x${c.orders}</span>`:""}<br><span class="sm">${esc(c.phone)} · Last order: ${c.last||"-"}</span></div></div><span style="text-align:right"><b class="pos">${tk(c.spent)}</b>${c.due?`<br><span class="sm low">Due ${tk(c.due)}</span>`:""}</span></div><div style="margin-top:8px"><a class="wa" style="display:block;text-align:center" target="_blank" rel="noopener" href="${waLink(c.phone,"Assalamu alaikum "+c.name+"! This is CrossBar BD — just checking in. Let us know if you need anything, or if you're looking for a new jersey! 😊")}">💬 Message on WhatsApp</a></div>${c.vip?`<div class="sm" style="margin-top:6px">Discount code: <b>${c.code}</b> <button class="s xs" onclick="copyMsg(this,'${c.code}')">📋 Copy</button>${c.refs?` · ${c.refs} order(s) used this code`:""}</div>`:""}
+<details class="hl" style="margin-top:10px;padding:8px 10px;border-radius:8px">
+  <summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;user-select:none">
+    <span>📦 Order History (${c.orderList.length})</span>
+    <span class="sm" style="color:var(--a);font-weight:600">Total Spend: ${tk(c.spent)} ▾</span>
+  </summary>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--c);border:1px solid var(--b);border-radius:6px;padding:8px;margin:8px 0;text-align:center">
+    <div>
+      <div class="k" style="font-size:10px">Total Spend</div>
+      <b class="pos" style="font-size:13px">${tk(c.spent)}</b>
+    </div>
+    <div>
+      <div class="k" style="font-size:10px">Total Orders</div>
+      <b style="font-size:13px">${c.orderList.length}</b>
+    </div>
+    <div>
+      <div class="k" style="font-size:10px">Unpaid Due</div>
+      <b class="${c.due?'low':''}" style="font-size:13px">${tk(c.due)}</b>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    ${c.orderList.map(o=>`
+      <div style="background:var(--c);border:1px solid var(--b);border-radius:6px;padding:8px;font-size:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-weight:600">📅 ${o.date}${o.area?` · ${esc(o.area)}`:""}</span>
+          <span class="tag ${stClass(o.status)}" style="font-size:10px;padding:2px 6px">${o.status}</span>
+        </div>
+        <div style="color:var(--t);margin-bottom:4px">
+          ${o.items.map(i=>`<span>${esc(i.name)} · ${i.slv}${i.size?" ("+i.size+")":""} ×${i.qty}</span>`).join(", ")}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;border-top:1px dashed var(--b);padding-top:4px;margin-top:4px;font-size:11px">
+          <span>Total: <b>${tk(total(o))}</b> · Paid: ${tk(o.paid)}${dueOf(o)?` · <b class="low">Due: ${tk(dueOf(o))}</b>`:""}</span>
+          <div style="display:flex;gap:4px">
+            <button class="s xs" onclick="invoice('${o.id}')" style="padding:2px 6px;font-size:10px">🧾 Invoice</button>
+            <button class="s xs" onclick="tab='ord';ed='${o.id}';render()" style="padding:2px 6px;font-size:10px">✏️ View</button>
+          </div>
+        </div>
+        ${o.notes?`<div class="sm" style="margin-top:4px;color:var(--m)">📝 Note: ${esc(o.notes)}</div>`:""}
+      </div>
+    `).join("")}
+  </div>
+</details>
+</div>`).join("")||'<div class="card sm">No customers yet</div>'}`;
+  }
+  if(tab=="stk"){
+    const cn=t=>S.products.filter(p=>p.team==t).length;
+    const missingCount = INITIAL_PRODUCTS.filter(ip => !S.products.some(p => (p.name||'').trim().toLowerCase() === ip.name.trim().toLowerCase())).length;
+
+    // Find all low and out-of-stock sizes (<= 1)
+    const lowSizes = [];
+    S.products.forEach(p => {
+      SL.forEach(sl => {
+        const v = p.v[sl];
+        if (v && v.cost > 0) {
+          SZ.forEach(z => {
+            const q = v.sizes[z] || 0;
+            if (q <= 1) {
+              lowSizes.push({ p, sl, z, q });
+            }
+          });
+        }
+      });
+    });
+    lowSizes.sort((a,b) => a.q - b.q || a.p.name.localeCompare(b.p.name));
+
+    const lowStockSection = lowSizes.length > 0 ? `
+      <details class="card" style="border-color:var(--neg);background:linear-gradient(180deg,var(--c),rgba(220,38,38,0.03));margin-bottom:12px">
+        <summary style="cursor:pointer;font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center;color:var(--neg);user-select:none">
+          <span style="display:flex;align-items:center;gap:6px">
+            <span>⚠️ Low Stock & Overselling Warning (${lowSizes.length})</span>
+          </span>
+          <span class="tag" style="background:rgba(220,38,38,0.18);color:var(--neg);border:1px solid rgba(220,38,38,0.4)">
+            ${lowSizes.filter(x => x.q === 0).length} Out of stock · ${lowSizes.filter(x => x.q === 1).length} Low (1 pc)
+          </span>
+        </summary>
+        <div class="sm" style="margin:8px 0;line-height:1.4">
+          Warning: These sizes have <b>1 or 0 units remaining</b>. Update stock below or exercise caution when taking confirmed orders to prevent overselling. Tap <b>+ Restock</b> to quickly add pieces.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;padding-right:2px">
+          ${lowSizes.map(({p, sl, z, q}) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:6px 10px;font-size:12px">
+              <div>
+                <b>${esc(p.name)}</b> <span class="sm">(${sl} · Size <b>${z}</b>)</span><br>
+                <span class="tag ${q===0?'tag no':'tag wt'}" style="font-size:10px;padding:2px 7px;font-weight:700">
+                  ${q===0?'🚫 Out of Stock (0 pcs)':'⚠️ Low: Only 1 pc left'}
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <button class="s xs" onclick="adj('${p.id}','${sl}','${z}',1)" style="font-size:11px;padding:4px 9px;background:var(--a);color:var(--btnTxt);border-radius:6px">+ Restock</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </details>
+    ` : `
+      <div class="card sm" style="color:var(--pos);border-color:var(--pos);background:rgba(22,163,74,0.04);margin-bottom:12px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+        <span>✅</span>
+        <span><b>Stock is Healthy:</b> No jersey sizes are currently at 0 or 1 piece.</span>
+      </div>
+    `;
+
+    const loadBanner = S.products.length === 0 ? `
+      <div class="card" style="border-color:var(--a);background:linear-gradient(180deg,var(--c),rgba(220,38,38,0.06));text-align:center;padding:16px 12px;margin-bottom:12px">
+        <b style="font-size:15px">📦 Stock is empty!</b>
+        <div class="sm" style="margin:6px 0 12px">Tap below to load your ${INITIAL_PRODUCTS.length} popular CrossBar BD catalog jerseys (Club & National Home/Away) with sizes and prices in 1 click, or add products manually.</div>
+        <button onclick="loadDefaultCatalog(true)" style="width:auto;padding:8px 16px;font-size:13px;border-radius:8px">📥 Load ${INITIAL_PRODUCTS.length} Popular Jerseys</button>
+      </div>` : `
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span class="sm">${S.products.length} jerseys in catalog (${cn("Club")} Club, ${cn("National")} National)</span>
+        <div style="display:flex;gap:4px">
+          ${missingCount > 0 ? `<button class="s xs" style="background:var(--a);color:var(--btnTxt)" onclick="addMissingCatalogJerseys()" title="Add new missing club jerseys to your stock">+ Add ${missingCount} Club Jerseys</button>` : ''}
+          <button class="s xs" onclick="sure(this,()=>loadDefaultCatalog(true))" title="Reload popular catalog jerseys">↻ Reset All (${INITIAL_PRODUCTS.length})</button>
+        </div>
+      </div>`;
+
+    h=`<details class="card"><summary style="cursor:pointer"><b>🏪 Business Info</b></summary><div class="sm" style="margin:6px 0 4px">Shown on invoices so customers can call you.</div><input id="bph" value="${esc(S.biz.phone)}" placeholder="e.g. 01712345678"><button style="margin-top:6px" onclick="saveBiz()">Save</button></details><details class="card"><summary style="cursor:pointer"><b>📦 Packaging Cost</b></summary><div class="grid" style="margin:6px 0"><div><div class="k">Total Amount</div><input id="pkT" type="number" value="${S.pkg.t||""}" placeholder="300"></div><div><div class="k">Packets Bought</div><input id="pkQ" type="number" value="${S.pkg.q||""}" placeholder="50"></div></div><button onclick="savePkg()">Save</button><div class="sm" style="margin-top:6px">Packaging per unit: <b>${tk(pk())}</b></div></details><details class="card"><summary style="cursor:pointer"><b>➕ Add New Product (Batch)</b></summary><div class="f" style="margin-top:8px"><select id="ptm"><option>National</option><option>Club</option></select><input id="pn" placeholder="Jersey name (e.g. Barcelona Home Kit)"><select id="pk" onchange="kindCh()">${Object.keys(KP).map(k=>`<option>${k}</option>`).join("")}</select><div><div class="k">Pura batch-er mot vara/import khoroj (taka)</div><input id="pv" type="number" placeholder="200"></div>
+${SL.map(sl=>{const c=sl[0];return`<div class="hl"><b>${sl} sleeve</b><div class="grid" style="margin:6px 0"><div><div class="k">Buying Price / pc</div><input id="c${c}" type="number" value="${sl=="Half"?780:950}"></div><div><div class="k">Selling Price</div><input id="p${c}" type="number" value="${KP.Player[sl=="Half"?0:1]}"></div></div><div class="grid5">${SZ.map(z=>`<div><div class="k">${z}</div><input id="s${c}${z}" type="number" min="0" placeholder="0"></div>`).join("")}</div></div>`}).join("")}</div><button onclick="addProduct()">+ Add Product</button></details>${loadBanner}${lowStockSection}<div style="position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0"><input id="stq" placeholder="🔍 Search (e.g. Barcelona, Argentina)" value="${esc(stq)}" oninput="stq=this.value;$('slist').innerHTML=stkList()"><div style="display:flex;gap:6px;margin-top:6px">${[["all","All ("+S.products.length+")"],["National","National ("+cn("National")+")"],["Club","Club ("+cn("Club")+")"]].map(([k,l])=>`<button class="s" style="flex:1;${stf==k?"background:var(--a);color:#fff":""}" onclick="stf='${k}';render()">${l}</button>`).join("")}</div></div><div id="slist">${stkList()}</div>`;
+  }
+  if(tab=="ord"){
+    const cn=S.orders.filter(o=>o.status=="Cancelled").length;
+    const filteredOrders = getFilteredOrders();
+    const stCount = (st) => st === 'all' ? S.orders.length : S.orders.filter(o=>o.status===st).length;
+
+    h=`<div class="card"><div class="f"><input id="on" value="${esc(cinfo.name)}" oninput="cinfo.name=this.value" placeholder="Customer Name"><input id="oph" inputmode="tel" value="${esc(cinfo.phone)}" oninput="cinfo.phone=this.value" placeholder="Phone (01XXXXXXXXX)"><select id="op">${S.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${tot(p)})</option>`).join("")}</select><div class="grid"><select id="osl">${SL.map(x=>`<option>${x}</option>`).join("")}</select><select id="osz">${SZ.map(z=>`<option>${z}</option>`).join("")}</select></div><div class="grid"><div><div class="k">Qty</div><input id="oq" type="number" value="1" min="1"></div><div><div class="k">Price (blank = default)</div><input id="opr" type="number"></div></div><select id="oa" onchange="areaCh()"><option${lastMeta.area=="Dhaka"?" selected":""}>Dhaka</option><option${lastMeta.area!="Dhaka"?" selected":""}>Outside Dhaka</option></select><input id="oad" value="${esc(cinfo.addr)}" oninput="cinfo.addr=this.value" placeholder="Full address (area, thana, district)"><div class="grid"><div><div class="k">Delivery Charge (0 = Free)</div><input id="odl" type="number" value="${lastMeta.odl}"></div><div><div class="k">Discount</div><input id="od" type="number"></div></div><div><div class="k">Referral Code (optional)</div><input id="oref" value="${esc(cinfo.ref)}" oninput="cinfo.ref=this.value.toUpperCase()" placeholder="e.g. RAFI711" style="text-transform:uppercase"></div><div><div class="k">Courier Charge (Paid to Courier)</div><input id="ocr" type="number" value="${lastMeta.ocr}"></div><div><div class="k">Payment Method</div><select id="opm">${PAYM.map(p=>`<option>${p}</option>`).join("")}</select></div><div><div class="k">Advance / paid</div><input id="opd" type="number"></div><div><div class="k">Notes / Special Instructions (optional)</div><textarea id="ont" oninput="cinfo.notes=this.value" placeholder="e.g. Gift wrap, Call before delivery, Custom name printing, Urgent..." rows="2" style="font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--b);background:var(--c);color:var(--t);width:100%;resize:vertical">${esc(cinfo.notes||"")}</textarea></div><select id="ot"><option value="ord">Order (decreases stock)</option><option value="pre">Pre-order</option></select></div><button class="s" onclick="addToCart()">+ Add Item to Order</button>
+${cart.length?`<div class="hl" style="margin-top:8px"><b>Items in this order (${cart.length})</b>${cart.map((c,idx)=>`<div class="row" style="padding:4px 0"><span>${esc(c.name)} · ${c.slv} ${c.size} ×${c.qty}</span><span><b>${tk(c.price*c.qty)}</b> <button class="d xs" onclick="rmCart(${idx})">×</button></span></div>`).join("")}<div class="row" style="padding:4px 0"><b>Subtotal</b><b>${tk(cart.reduce((a,c)=>a+c.price*c.qty,0))}</b></div></div>`:'<div class="sm" style="margin-top:6px">No items added yet — add each jersey above, then Create Order.</div>'}
+<button style="margin-top:8px" onclick="addOrder()">✅ Create Order${cart.length>1?" ("+cart.length+" items)":""}</button></div>
+
+<!-- Order Filter Card -->
+<div class="card" style="margin-top:10px;margin-bottom:10px;padding:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <b style="font-size:14px">🔍 Filter Orders</b>
+    ${(ordStFilter!='all'||ordDateFrom||ordDateTo||ordSearch)?`<button class="s xs" onclick="clearOrdFilters()" style="color:var(--neg)">✕ Reset Filters</button>`:''}
+  </div>
+
+  <input id="ordSrch" placeholder="🔎 Search customer, phone, address, jersey..." value="${esc(ordSearch)}" oninput="ordSearch=this.value;renderOrdList()" style="margin-bottom:8px;padding:8px 10px;font-size:13px">
+
+  <div class="k" style="margin-bottom:4px;font-size:11px">Status:</div>
+  <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch">
+    ${[
+      ["all", "All ("+stCount("all")+")", ""],
+      ["Pre-order", "🟡 Pre-order ("+stCount("Pre-order")+")", "st-pre"],
+      ["Confirmed", "🟢 Confirmed ("+stCount("Confirmed")+")", "st-conf"],
+      ["Delivered", "🔵 Delivered ("+stCount("Delivered")+")", "st-delv"],
+      ["Cancelled", "⚪ Cancelled ("+stCount("Cancelled")+")", "st-canc"]
+    ].map(([st, label, cls]) => {
+      const active = ordStFilter == st;
+      const activeStyle = active
+        ? (cls ? `background:var(--${cls}-bg);color:var(--${cls}-text);border:1px solid var(--${cls}-border);font-weight:700` : 'background:var(--a);color:var(--btnTxt);font-weight:700')
+        : '';
+      return `<button class="s xs" style="white-space:nowrap;font-size:11px;padding:6px 11px;border-radius:20px;${activeStyle}" onclick="setOrdFilter('${st}')">${label}</button>`;
+    }).join("")}
+  </div>
+
+  <div class="k" style="margin-bottom:4px;font-size:11px">Date Range:</div>
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:6px;align-items:center">
+    <div>
+      <div class="sm" style="font-size:10px;color:var(--m)">From:</div>
+      <input type="date" id="ordFrom" value="${ordDateFrom}" onchange="setOrdDateFrom(this.value)" style="padding:6px;font-size:12px">
+    </div>
+    <div>
+      <div class="sm" style="font-size:10px;color:var(--m)">To:</div>
+      <input type="date" id="ordTo" value="${ordDateTo}" onchange="setOrdDateTo(this.value)" style="padding:6px;font-size:12px">
+    </div>
+  </div>
+
+  <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+    <button class="s xs" style="flex:1;font-size:10px;padding:5px 6px" onclick="setOrdQuickDate('today')">Today</button>
+    <button class="s xs" style="flex:1;font-size:10px;padding:5px 6px" onclick="setOrdQuickDate('7days')">Last 7 Days</button>
+    <button class="s xs" style="flex:1;font-size:10px;padding:5px 6px" onclick="setOrdQuickDate('month')">This Month</button>
+    ${(ordDateFrom||ordDateTo)?`<button class="d xs" style="font-size:10px;padding:5px 8px" onclick="setOrdQuickDate('clear')">Clear Date</button>`:''}
+  </div>
+
+  <div id="ordSummaryText" class="sm" style="margin-top:10px;padding-top:6px;border-top:1px solid var(--b);font-weight:600;display:flex;justify-content:space-between">
+    <span>Showing: ${filteredOrders.length} of ${S.orders.length} orders</span>
+    <span>Total: ${tk(filteredOrders.reduce((a,o)=>a+total(o),0))}</span>
+  </div>
+</div>
+
+${cn?`<button class="s" style="margin-bottom:10px" onclick="sure(this,clrC)">Clear ${cn} Cancelled Orders</button>`:""}
+
+<div id="ordListContainer">
+  ${filteredOrders.length ? filteredOrders.map(o=>ed==o.id?editCard(o):renderOrderCardHtml(o)).join("") : '<div class="card sm" style="text-align:center;padding:18px 10px">No orders found matching the filter.<br><button class="s xs" style="margin-top:8px" onclick="clearOrdFilters()">Reset Filters</button></div>'}
+</div>`;
+  }
+  if(tab=="sum"){
+    const pcs=S.products.reduce((a,p)=>a+tot(p),0),mv=S.products.reduce((a,p)=>a+SL.reduce((x,sl)=>x+vp(p,sl)*p.v[sl].price,0),0),sc=c.inv,sp_=mv-sc,kena=S.products.reduce((a,p)=>a+p.inv,0),got=live.reduce((a,o)=>a+Math.min(o.paid,total(o)),0);
+    const curMonth = today().slice(0, 7);
+    const monthOrders = sold.filter(o => o.date && o.date.startsWith(curMonth));
+    const monthRev = monthOrders.reduce((a, o) => a + total(o), 0);
+    const monthPcs = monthOrders.reduce((a, o) => a + o.items.reduce((x, i) => x + i.qty, 0), 0);
+    const goal = (typeof S.monthlyGoal === "number" && S.monthlyGoal > 0) ? S.monthlyGoal : 50000;
+    const pct = goal > 0 ? Math.round((monthRev / goal) * 100) : 0;
+    const monthName = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
+    h=`<div class="card" style="border:1px solid var(--b);position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div>
+      <div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px">🎯 Monthly Sales Target</div>
+      <b style="font-size:16px">${monthName}</b>
+    </div>
+    <span class="tag ${monthRev>=goal?'st-conf':pct>=50?'st-delv':'st-pre'}" style="font-size:12px;font-weight:700">
+      ${pct}% ${monthRev>=goal?'🏆 Goal Met!':'Done'}
+    </span>
+  </div>
+
+  <div style="background:var(--b);border-radius:99px;height:12px;width:100%;overflow:hidden;margin:8px 0;position:relative">
+    <div style="background:${monthRev>=goal?'var(--pos)':'linear-gradient(90deg,var(--a),#3b82f6)'};width:${Math.min(pct,100)}%;height:100%;border-radius:99px;transition:width 0.4s ease"></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px">
+    <div style="background:var(--bg);padding:8px 10px;border-radius:8px">
+      <div class="k">Actual Revenue</div>
+      <div class="v pos" style="font-size:18px">${tk(monthRev)}</div>
+      <div class="sm" style="font-size:11px">${monthPcs} pcs sold this month (${monthOrders.length} orders)</div>
+    </div>
+    <div style="background:var(--bg);padding:8px 10px;border-radius:8px">
+      <div class="k">Target Revenue</div>
+      <div class="v" style="font-size:18px">${tk(goal)}</div>
+      <div class="sm ${monthRev>=goal?'pos':'low'}" style="font-size:11px">${monthRev>=goal?'🎉 Goal Achieved!':tk(goal-monthRev)+' remaining'}</div>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--b);padding-top:8px">
+    <div class="k" style="margin-bottom:4px;font-size:11px">Set Monthly Sales Goal (৳):</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input id="monthlyGoalInput" type="number" min="0" step="1000" value="${goal}" placeholder="e.g. 50000" style="flex:1;padding:7px 10px;font-size:13px">
+      <button style="width:auto;padding:7px 14px;font-size:13px;white-space:nowrap" onclick="saveMonthlyGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+<div class="card"><b>📦 Current Stock</b>${R("Total Jerseys",pcs+" pcs")}${R("Buying Cost (with freight+packaging)",tk(sc))}${R("Expected Sale Value (if sold)",tk(mv))}${R("Expected Profit from Stock",tk(sp_),sp_<0?"neg":"pos")}</div>
+<div class="card"><b>💸 Total Expenses So Far</b>${R("Jersey Cost + Freight (all batches)",tk(kena))}${R("Packaging",tk(S.pkg.t))}${R("Courier / Other Expenses",tk(c.opx+c.courier))}${R("Ad Spend",tk(c.spend))}${R("<b>Total Expense (Investment)</b>",tk(c.invest))}</div>
+<div class="card"><b>💰 Sales Summary</b>${R("Sales ("+c.sp+" pcs, delivery included)",tk(c.rev))}${R("Jersey Cost",tk(c.cg))}${R("Ads + Courier + Other Expenses",tk(c.spend+c.opx+c.courier))}${R("<b>Net Profit So Far</b>",tk(c.net),c.net<0?"neg":"pos")}${R("Amount Received",tk(got))}${R("Amount Due",tk(c.due),c.due?"neg":"")}</div>
+<div class="card"><b>🎯 If All Stock Sells</b>${R("Total Expected Sales",tk(c.rev+mv))}${R("<b>Total Expected Profit</b>",tk(c.net+sp_),c.net+sp_<0?"neg":"pos")}<div class="sm" style="margin-top:6px">= Ekhon-er net lav (${tk(c.net)}) + stock-er expected lav (${tk(sp_)}). Future ad spend and delivery/courier not factored in.</div></div>
+<h2>Stock Value by Product</h2><div class="card">${S.products.map(p=>{const m=SL.reduce((x,sl)=>x+vp(p,sl)*p.v[sl].price,0),k=SL.reduce((x,sl)=>x+vp(p,sl)*unit(p,sl),0);return`<div class="row"><span>${esc(p.name)}<br><span class="sm">${tot(p)} pcs · cost ${tk(k)} · sale ${tk(m)}</span></span><b class="${m-k<0?"neg":"pos"}">${tk(m-k)}</b></div>`}).join("")||'<div class="sm">No products yet</div>'}</div>`;
+  }
+  if(tab=="due"){
+    const L=live.filter(o=>dueOf(o)>0);
+    h=`<div class="card"><div class="k">Total Due</div><div class="v low">${tk(c.due)}</div><div class="sm">${L.length} customers with pending balance</div></div>${L.map(o=>{return`<div class="card"><div class="row" style="border:0;padding:0"><span><b>${esc(o.name)}</b><br><span class="sm">${esc(o.phone)} · ${o.date}</span></span><b class="low">${tk(dueOf(o))}</b></div><div class="sm">${o.items.map(i=>esc(i.name)+" ×"+i.qty).join(", ")} · Total ${tk(total(o))}, Paid ${tk(o.paid)}</div><div style="display:flex;gap:6px;margin-top:8px"><input id="pay${o.id}" type="number" placeholder="Amount received"><button style="width:auto" onclick="payIn('${o.id}')">Joma</button><button class="s" onclick="full('${o.id}')">Full</button></div><div style="margin-top:8px"><a class="wa" target="_blank" rel="noopener" href="${waLink(o.phone,"Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support!")}">💬 WhatsApp reminder</a> <button class="s" onclick='copyMsg(this,${JSON.stringify("Assalamu alaikum " + o.name + "! This is a gentle reminder from CrossBar BD — an amount of " + tk(dueOf(o)) + " is still pending on your order. We would really appreciate it if you could complete the payment at your convenience. Thank you for your support!")})'>📋</button></div></div>`}).join("")||'<div class="card sm">No outstanding dues 🎉</div>'}`;
+  }
+  if(tab=="pro"){
+    const it=[];sold.forEach(o=>o.items.forEach(x=>it.push([o,x])));
+    const kn=it.reduce((a,[o,x])=>a+x.qty*(x.kena??x.cost),0),vr=it.reduce((a,[o,x])=>a+x.qty*(x.vara||0),0),pkS=it.reduce((a,[o,x])=>a+x.qty*(x.pack||0),0),delv=sold.reduce((a,o)=>a+o.delivery,0),jrev=c.rev-delv,lc=S.exp.filter(e=>e.cat=="Courier").reduce((a,e)=>a+e.amt,0),oth=c.opx-lc,cour=c.courier+lc,pc=x=>c.rev?Math.round(x/c.rev*100)+"%":"-",ap=c.adsPer;
+    const by={};it.forEach(([o,x])=>{const k=x.pid+x.slv,b=by[k]=by[k]||{n:x.name+" · "+x.slv,q:0,r:0};b.q+=x.qty;b.r+=x.qty*x.price});
+    const cc=(p,sl)=>{
+      const v=p.v[sl],pkg=pk(),base=v.cost+p.vara+pkg,full=base+ap,lav=v.price-full,pct=v.price?Math.round(lav/v.price*100):0,vl=p.vt&&p.bp?` (${tk(p.vt)} ÷ ${p.bp} pcs)`:"",pl=S.pkg.q?` (${tk(S.pkg.t)} ÷ ${S.pkg.q} packet)`:"";
+      return`<details class="card"><summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center"><b>${esc(p.name)} · ${sl} sleeve</b><b class="${lav<0?"neg":"pos"}">${tk(lav)} (${pct}%)</b></summary><div style="margin-top:8px">${R("Buying Price",tk(v.cost))}${R("+ Freight / pc"+vl,tk(p.vara))}${R("+ Packaging / pc"+pl,tk(pkg))}${R("= Jersey Cost",tk(base))}${R("+ Ad Cost Share (Total Ads ÷ Units Sold)",tk(ap))}${R("<b>= Total Cost per Jersey</b>",tk(full))}${R("Selling Price",tk(v.price))}${R("<b>Profit per Jersey</b> ("+pct+"%)",tk(lav),lav<0?"neg":"pos")}</div></details>`;
+    };
+    const oc=o=>{
+      const q=o.items.reduce((a,x)=>a+x.qty,0),itemLine=o.items.map(x=>esc(x.name)+" · "+x.slv+" "+(x.size||"")+" ×"+x.qty).join(", "),
+      cs=o.items.every(x=>x.kena===undefined)?R("− Jersey Cost (buying+freight+packaging)",tk(cogs(o))):R("− Buying Cost (all items)",tk(o.items.reduce((a,x)=>a+(x.kena||x.cost)*x.qty,0)))+R("− Freight",tk(o.items.reduce((a,x)=>a+(x.vara||0)*x.qty,0)))+R("− Packaging",tk(o.items.reduce((a,x)=>a+(x.pack||0)*x.qty,0))),
+      lv=irev(o)+o.delivery-cogs(o)-(o.courier||0),ad=ap*q;
+      return`<div class="card"><div class="row" style="border:0;padding:0"><b>${esc(o.name)}</b><span class="sm">${o.date}</span></div><div class="sm">${itemLine}</div>${R("Jersey Sales"+(o.discount?" (discount "+tk(o.discount)+" deducted)":""),tk(irev(o)))}${R("+ Delivery Charge (Paid by Customer)",tk(o.delivery))}${R("= Total from Customer",tk(total(o)))}${cs}${R("− Paid to Courier",tk(o.courier||0))}${R("<b>Profit (before Ads)</b>",tk(lv),lv<0?"neg":"pos")}${R("− Ad Cost Share",tk(ad))}${R("<b>Final Profit</b>",tk(lv-ad),lv-ad<0?"neg":"pos")}</div>`;
+    };
+    const now = new Date();
+    const mData = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, "0");
+      const key = `${yr}-${mo}`;
+      const shortLabel = d.toLocaleString("en-US", { month: "short" });
+      const fullLabel = shortLabel + " '" + String(yr).slice(-2);
+
+      const mOrders = sold.filter(o => o.date && o.date.startsWith(key));
+      const rev = mOrders.reduce((a, o) => a + total(o), 0);
+      const cg = mOrders.reduce((a, o) => a + cogs(o), 0);
+      const cour = mOrders.reduce((a, o) => a + (o.courier || 0), 0);
+      const ads = S.ads.filter(a => a.date && a.date.startsWith(key)).reduce((a, x) => a + x.spend, 0);
+      const exp = S.exp.filter(e => EX.includes(e.cat) && e.date && e.date.startsWith(key)).reduce((a, e) => a + e.amt, 0);
+      const profit = rev - cg - cour - ads - exp;
+      const units = mOrders.reduce((a, o) => a + o.items.reduce((x, i) => x + i.qty, 0), 0);
+
+      mData.push({ key, shortLabel, fullLabel, rev, profit, units, count: mOrders.length });
+    }
+    const maxAbsProfit = Math.max(...mData.map(m => Math.abs(m.profit)), 1);
+    const total6mProfit = mData.reduce((a, m) => a + m.profit, 0);
+    const bestMonth = [...mData].sort((a, b) => b.profit - a.profit)[0];
+
+    const profitChartHtml = `<div class="card" style="position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <div class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px">📈 Monthly Profit Trend</div>
+          <b style="font-size:15px">Last 6 Months</b>
+        </div>
+        <span class="tag ${total6mProfit>=0?'st-conf':'st-canc'}" style="font-size:11.5px;font-weight:700">
+          ${tk(total6mProfit)} 6-Mo Total
+        </span>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;gap:6px;height:115px;padding:10px 4px 6px;border-bottom:1px solid var(--b);margin-bottom:8px">
+        ${mData.map(m => {
+          const h = m.profit === 0 ? 3 : Math.max(8, Math.round((Math.abs(m.profit) / maxAbsProfit) * 75));
+          const isPos = m.profit >= 0;
+          const barColor = m.profit === 0 ? 'var(--b)' : isPos ? 'linear-gradient(180deg, var(--pos), rgba(22, 163, 74, 0.75))' : 'linear-gradient(180deg, var(--neg), rgba(220, 38, 38, 0.75))';
+          const txtColor = m.profit === 0 ? 'var(--m)' : isPos ? 'var(--pos)' : 'var(--neg)';
+          return `
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px">
+              <span style="font-size:9px;font-weight:700;color:${txtColor};white-space:nowrap;line-height:1">
+                ${m.profit === 0 ? '৳0' : (m.profit < 0 ? '-' : '') + '৳' + Math.abs(Math.round(m.profit))}
+              </span>
+              <div style="width:100%;max-width:36px;background:${barColor};border-radius:4px 4px 0 0;height:${h}px;transition:height 0.3s ease" title="${m.fullLabel}: Revenue ${tk(m.rev)}, Profit ${tk(m.profit)} (${m.units} pcs sold)"></div>
+              <span class="sm" style="font-size:10px;font-weight:600;margin-top:2px;white-space:nowrap">${m.shortLabel}</span>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--m);padding-top:2px">
+        <span>6-Mo Avg: <b style="color:var(--t)">${tk(Math.round(total6mProfit / 6))}</b>/mo</span>
+        ${bestMonth && bestMonth.profit > 0 ? `<span>Best: <b style="color:var(--pos)">${bestMonth.shortLabel} (${tk(bestMonth.profit)})</b></span>` : ''}
+      </div>
+    </div>`;
+
+    h=profitChartHtml+`<div class="card"><b>🧾 Net Profit — Step by Step</b>${R("Jersey Sales (after discount)",tk(jrev))}${R("+ Delivery Charge (Paid by Customer)",tk(delv))}${R("<b>= Total Sales</b>",tk(c.rev))}${R("− Jersey Buying Cost",tk(kn))}${R("− Freight (per pc share)",tk(vr))}${R("− Packaging (per pc share)",tk(pkS))}${R("− Paid to Courier",tk(cour))}${R("− Other Expenses",tk(oth))}${R("− Ad Spend",tk(c.spend))}${R("<b>= Net Profit</b>",tk(c.net),c.net<0?"neg":"pos")}<div class="sm" style="margin-top:6px">Margin ${pc(c.net)} · Total investment (stock+packaging+expenses+ads): ${tk(c.invest)}</div></div>
+<div class="card"><b>📊 Where Every ৳100 of Sales Goes</b>${R("Jersey Cost",pc(kn))}${R("Freight",pc(vr))}${R("Packaging",pc(pkS))}${R("Courier",pc(cour))}${R("Other Expenses",pc(oth))}${R("Ads",pc(c.spend))}${R("<b>Profit</b>",pc(c.net),c.net<0?"neg":"pos")}</div>
+<h2>Full Cost Breakdown per Jersey</h2><div class="sm" style="margin-bottom:6px">Tap a jersey to see its full cost breakdown. Freight and packaging are split across all units.</div>${S.products.map(p=>SL.filter(sl=>p.v[sl].cost>0).map(sl=>cc(p,sl)).join("")).join("")||'<div class="card sm">Add jerseys in Stock to see full breakdown</div>'}
+<h2>Payment Method Breakdown</h2><div class="card">${(()=>{const pm={};sold.forEach(o=>{const k=o.pay||"COD";pm[k]=(pm[k]||0)+total(o)});return PAYM.map(k=>pm[k]?R(k,tk(pm[k])):"").join("")||'<div class="sm">No sales yet</div>'})()}</div>
+<h2>Best-Selling Products</h2><div class="card">${Object.values(by).sort((a,b)=>b.q-a.q).map((b,idx)=>`<div class="row"><span>${idx==0?"🏆 ":""}${esc(b.n)}<br><span class="sm">${b.q} units sold</span></span><b>${tk(b.r)}</b></div>`).join("")||'<div class="sm">No sales yet</div>'}</div>
+<h2>Monthly Report</h2><div class="card">${(()=>{const m={};sold.forEach(o=>{const k=o.date.slice(0,7),x=m[k]=m[k]||{r:0,c:0,n:0};x.r+=total(o);x.c+=cogs(o);x.n++});return Object.entries(m).sort((a,b)=>b[0].localeCompare(a[0])).map(([k,v])=>`<div class="row"><span>${k}<br><span class="sm">${v.n} orders</span></span><span style="text-align:right"><b>${tk(v.r)}</b><br><span class="sm">profit ${tk(v.r-v.c)}</span></span></div>`).join("")||'<div class="sm">No sales yet</div>'})()}</div>
+<h2>Order-wise Breakdown</h2>${sold.slice(0,15).map(oc).join("")||'<div class="card sm">No sales yet</div>'}
+<h2>Other Expenses</h2><div class="card"><div class="f"><select id="ec"><option>Other</option></select><div class="grid"><input id="ea" type="number" placeholder="Amount (৳)"><input id="ed" type="date" value="${today()}"></div><input id="en" placeholder="Note (e.g. tea, transport)"></div><button onclick="addExp()">+ Add Expense</button><div class="sm" style="margin-top:6px">Do not log buying cost, freight, packaging or courier here — those are auto-calculated from Stock and Orders.</div></div>
+<div class="card">${S.exp.map(e=>`<div class="row"><span>${esc(e.cat)}${EX.includes(e.cat)?"":' <span class="tag">old</span>'}<br><span class="sm">${e.date} ${esc(e.note)}</span></span><span><b>${tk(e.amt)}</b> <button class="d" onclick="sure(this,()=>delE('${e.id}'))">×</button></span></div>`).join("")||'<div class="sm">No expenses recorded</div>'}</div>
+<button onclick="dlCsv()">📥 Export Orders to Excel (CSV)</button>`;
+  }
+  if(tab=="ads"){
+    h=`<div class="card"><div class="f"><input id="ad" type="date" value="${today()}"><input id="as" type="number" placeholder="Ad Spend (৳)"><input id="am" type="number" placeholder="Messages"><input id="ao" type="number" placeholder="Orders from Ads"></div><button onclick="addAd()">+ Add Ad Entry</button></div><div class="card"><div class="grid"><div><div class="k">Spend</div><b>${tk(c.spend)}</b></div><div><div class="k">Cost per Message</div><b>${c.am?tk(c.spend/c.am):"-"}</b></div></div>${S.ads.map(x=>`<div style="border-top:1px solid var(--b);padding:8px 0"><div class="row" style="border:0;padding:0"><span class="sm">${x.date}</span><button class="d" onclick="sure(this,()=>delAd('${x.id}'))">×</button></div><div class="grid5" style="grid-template-columns:repeat(3,1fr);margin-top:4px"><div><div class="k">Spend</div><input type="number" value="${x.spend}" onchange="setAd('${x.id}','spend',this.value)"></div><div><div class="k">Messages</div><input type="number" value="${x.msgs}" onchange="setAd('${x.id}','msgs',this.value)"></div><div><div class="k">Orders</div><input type="number" value="${x.ords}" onchange="setAd('${x.id}','ords',this.value)"></div></div></div>`).join("")}</div>`;
+  }
+  $("app").innerHTML=h;
+}
+
+// LocalStorage & Multi-Layer load
+try{
+  let l=localStorage.getItem("cbd");
+  if(!l) l=localStorage.getItem("cbd_backup_snapshot");
+  if(l) S=JSON.parse(l);
+}catch(e){
+  try{
+    const snap=localStorage.getItem("cbd_backup_snapshot");
+    if(snap) S=JSON.parse(snap);
+  }catch(err){}
+}
+
+if (!S.products || S.products.length === 0) {
+  loadDefaultCatalog(false);
+} else {
+  // Auto-merge any newly added Club or National jerseys without overwriting existing stock
+  addMissingCatalogJerseys(false);
+}
+
+applyTheme();
+render();
+updateSyncStatusUI();
+recoverFromIndexedDBIfEmpty();
+
+// Cloud & Firebase Setup
+function openCloudModal(){
+  updateCloudUI();
+  $("cloudModal").classList.add("open");
+}
+function closeCloudModal(){
+  $("cloudModal").classList.remove("open");
+}
+
+function updateCloudUI(){
+  const statusEl = $("cloudStatusText");
+  const authEl = $("authUserText");
+  const gLogin = $("gLoginBtn");
+  const gLogout = $("gLogoutBtn");
+
+  if(doc){
+    statusEl.innerHTML = '<span class="pos">🟢 Connected to Firebase Firestore</span><br><span class="sm">Doc: crossbar/state</span>';
+  } else {
+    statusEl.innerHTML = '<span class="sm" style="color:var(--m)">📱 Local Mode (Data saved on device)</span>';
+  }
+
+  if(curUser){
+    authEl.textContent = "Signed in as: " + (curUser.email || curUser.displayName || "Authorized User");
+    gLogin.style.display = "none";
+    gLogout.style.display = "inline-block";
+  } else {
+    authEl.textContent = "Not signed in to Google / Firebase";
+    gLogin.style.display = "inline-block";
+    gLogout.style.display = "none";
+  }
+  const cfg = localStorage.getItem("cbd_firebase_config") || "";
+  if($("fbCfgInput") && !$("fbCfgInput").value) $("fbCfgInput").value = cfg;
+}
+
+async function initFirebase(){
+  try{
+    if(typeof firebase === 'undefined'){
+      updateSyncStatusUI();
+      return;
+    }
+    let cfg = null;
+    const storedCfg = localStorage.getItem("cbd_firebase_config");
+    if(storedCfg){
+      try{ cfg = JSON.parse(storedCfg) }catch(e){}
+    }
+    // Default project config placeholder if not configured
+    if(!cfg && window.CROSSBAR_FIREBASE_CONFIG){
+      cfg = window.CROSSBAR_FIREBASE_CONFIG;
+    }
+    if(!cfg) {
+      if($("st")) $("st").textContent = "(device saved)";
+      updateSyncStatusUI();
+      return;
+    }
+    if(!firebase.apps.length){
+      firebase.initializeApp(cfg);
+    }
+    fbDb = firebase.firestore();
+    fbAuth = firebase.auth();
+    doc = fbDb.collection("crossbar").doc("state");
+
+    fbAuth.onAuthStateChanged(async (user)=>{
+      curUser = user;
+      updateCloudUI();
+      if(user){
+        await syncFromFirestore();
+      }
+    });
+
+    await syncFromFirestore();
+  }catch(e){
+    console.warn("Firebase init error:", e);
+    doc = null;
+    if($("st")) $("st").textContent = "(device saved)";
+    updateSyncStatusUI();
+  }
+}
+
+async function syncFromFirestore(){
+  if(!doc) {
+    updateSyncStatusUI();
+    return;
+  }
+  isSyncing = true;
+  updateSyncStatusUI();
+  try{
+    const s = await doc.get();
+    if(s.exists){
+      const remoteData = s.data() || {};
+      const remoteOrders = Array.isArray(remoteData.orders) ? remoteData.orders : [];
+      const localOrders = Array.isArray(S.orders) ? S.orders : [];
+
+      // Defensive Zero-Data-Loss Protection:
+      // If local device has unsynced offline orders, push local -> cloud instead of overwriting with older state
+      if((localOrders.length > 0 && remoteOrders.length === 0) || (pendingSync && localOrders.length >= remoteOrders.length)){
+        console.log("Preserving offline local orders and uploading to Firestore...");
+        await doc.set(JSON.parse(JSON.stringify(S)));
+        if($("st")) $("st").textContent = "✓ synced";
+        pendingSync = false;
+        try{localStorage.removeItem("cbd_pending_sync")}catch(e){}
+      } else {
+        S = Object.assign({products:[],orders:[],ads:[],exp:[],pkg:{t:0,q:0},monthlyGoal:50000}, JSON.parse(JSON.stringify(remoteData)));
+        render();
+        if($("st")) $("st").textContent = "✓ synced";
+        persistAll(S);
+        pendingSync = false;
+        try{localStorage.removeItem("cbd_pending_sync")}catch(e){}
+      }
+    } else if((S.products && S.products.length) || (S.orders && S.orders.length)) {
+      await doc.set(JSON.parse(JSON.stringify(S)));
+      if($("st")) $("st").textContent = "✓ synced";
+      pendingSync = false;
+      try{localStorage.removeItem("cbd_pending_sync")}catch(e){}
+    }
+  }catch(err){
+    console.warn("Firestore sync error:", err);
+  }finally{
+    isSyncing = false;
+    updateSyncStatusUI();
+  }
+}
+
+async function forceSyncCloud(){
+  if(!doc) {
+    toast("Please configure Firebase credentials first");
+    return;
+  }
+  await trySyncNow();
+}
+
+async function loginWithGoogle(){
+  if(!fbAuth){
+    toast("Please set Firebase config first");
+    return;
+  }
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await fbAuth.signInWithPopup(provider);
+    toast("Signed in with Google ✓");
+  }catch(e){
+    // If popup blocked or in webview, try redirect
+    try{
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await fbAuth.signInWithRedirect(provider);
+    }catch(err){
+      toast("Sign in failed: " + e.message);
+    }
+  }
+}
+
+async function logoutFirebase(){
+  if(fbAuth){
+    await fbAuth.signOut();
+    curUser = null;
+    updateCloudUI();
+    toast("Logged out");
+  }
+}
+
+function saveFirebaseConfig(){
+  const val = $("fbCfgInput").value.trim();
+  if(!val) return toast("Enter configuration JSON");
+  try{
+    JSON.parse(val);
+    localStorage.setItem("cbd_firebase_config", val);
+    toast("Config saved! Re-initializing...");
+    initFirebase();
+  }catch(e){
+    toast("Invalid JSON format");
+  }
+}
+
+function resetFirebaseConfig(){
+  localStorage.removeItem("cbd_firebase_config");
+  if($("fbCfgInput")) $("fbCfgInput").value = "";
+  doc = null;
+  updateCloudUI();
+  updateSyncStatusUI();
+  toast("Config reset to local");
+}
+
+// Initialize Firebase if configured
+initFirebase();
+</script>
+</body>
+</html>
