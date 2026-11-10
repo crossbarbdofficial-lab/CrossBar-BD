@@ -1,0 +1,121 @@
+name: Build APK & Deploy Web App
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-and-apk"
+  cancel-in-progress: false
+
+jobs:
+  build_apk:
+    name: Build Android APK & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses
+        run: yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+
+      - name: Decode Debug Keystore
+        run: |
+          if [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
+          [ -f .env ] || touch .env
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Build Debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Prepare CrossBarBD.apk
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk dist/CrossBarBD.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrossBarBD-APK
+          path: dist/CrossBarBD.apk
+          retention-days: 90
+
+      - name: Create or Update Latest Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: CrossBar BD Android App (Latest)
+          body: |
+            CrossBar BD Android APK (automatically built from the latest commit).
+            Tap **CrossBarBD.apk** below to download and install on Android.
+          files: dist/CrossBarBD.apk
+          prerelease: false
+
+  deploy_pages:
+    name: Deploy Web App (GitHub Pages)
+    needs: build_apk
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Built APK Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: CrossBarBD-APK
+          path: _apk_dist
+
+      - name: Prepare Web Site & APK Bundle
+        run: |
+          mkdir -p _site
+          cp -r app/src/main/assets/www/. _site/
+          touch _site/.nojekyll
+          if [ -f _apk_dist/CrossBarBD.apk ]; then
+            cp _apk_dist/CrossBarBD.apk _site/CrossBarBD.apk
+          elif [ -f public/CrossBarBD.apk ]; then
+            cp public/CrossBarBD.apk _site/CrossBarBD.apk
+          fi
+          ls -lh _site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
