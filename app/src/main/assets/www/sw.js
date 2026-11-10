@@ -1,4 +1,4 @@
-const CACHE_NAME = 'crossbar-v14';
+const CACHE_NAME = 'crossbar-v16';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

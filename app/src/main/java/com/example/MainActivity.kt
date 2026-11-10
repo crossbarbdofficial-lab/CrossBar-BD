@@ -125,6 +125,16 @@ class MainActivity : ComponentActivity() {
 
                         addJavascriptInterface(AndroidBridge(this@MainActivity), "AndroidBridge")
 
+                        setDownloadListener { url, _, _, _, _ ->
+                            if (!url.isNullOrBlank() && (url.startsWith("http://") || url.startsWith("https://"))) {
+                                try {
+                                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                                } catch (e: Exception) {
+                                    Toast.makeText(this@MainActivity, "Cannot open download link", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(
                                 view: WebView?,
@@ -176,6 +186,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleExternalLink(url: String): Boolean {
+        if (url.startsWith("javascript:") || url.startsWith("about:")) {
+            return false
+        }
         if (url.startsWith("whatsapp://") ||
             url.startsWith("https://api.whatsapp.com/") ||
             url.startsWith("https://wa.me/")
@@ -246,18 +259,22 @@ class MainActivity : ComponentActivity() {
                             saveToAppExternalDir(safeName, bytes)
                         }
                     } else {
-                        val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                        val targetDir = File(picturesDir, "CrossBarBD")
-                        if (!targetDir.exists()) targetDir.mkdirs()
-                        val file = File(targetDir, safeName)
-                        FileOutputStream(file).use { it.write(bytes) }
+                        try {
+                            val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                            val targetDir = File(picturesDir, "CrossBarBD")
+                            if (!targetDir.exists()) targetDir.mkdirs()
+                            val file = File(targetDir, safeName)
+                            FileOutputStream(file).use { it.write(bytes) }
 
-                        // Scan file so gallery picks it up immediately
-                        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
-                            data = Uri.fromFile(file)
+                            // Scan file so gallery picks it up immediately
+                            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
+                                data = Uri.fromFile(file)
+                            }
+                            context.sendBroadcast(mediaScanIntent)
+                            Toast.makeText(context, "🖼️ Invoice saved to Gallery: $safeName ✓", Toast.LENGTH_LONG).show()
+                        } catch (e: Exception) {
+                            saveToAppExternalDir(safeName, bytes)
                         }
-                        context.sendBroadcast(mediaScanIntent)
-                        Toast.makeText(context, "🖼️ Invoice saved to Gallery: $safeName ✓", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: Exception) {
                     Toast.makeText(context, "Gallery save failed: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -290,12 +307,16 @@ class MainActivity : ComponentActivity() {
                             saveToAppExternalDir(filename, bytes)
                         }
                     } else {
-                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                        val targetDir = File(downloadsDir, "CrossBarBD")
-                        if (!targetDir.exists()) targetDir.mkdirs()
-                        val file = File(targetDir, filename)
-                        FileOutputStream(file).use { it.write(bytes) }
-                        Toast.makeText(context, "Saved to Downloads/CrossBarBD: $filename", Toast.LENGTH_LONG).show()
+                        try {
+                            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                            val targetDir = File(downloadsDir, "CrossBarBD")
+                            if (!targetDir.exists()) targetDir.mkdirs()
+                            val file = File(targetDir, filename)
+                            FileOutputStream(file).use { it.write(bytes) }
+                            Toast.makeText(context, "Saved to Downloads/CrossBarBD: $filename", Toast.LENGTH_LONG).show()
+                        } catch (e: Exception) {
+                            saveToAppExternalDir(filename, bytes)
+                        }
                     }
                 } catch (e: Exception) {
                     Toast.makeText(context, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -367,6 +388,115 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(context, "Copy failed", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+
+        @JavascriptInterface
+        fun exportApk() {
+            Thread {
+                try {
+                    val srcFile = File(context.applicationInfo.sourceDir)
+                    if (!srcFile.exists()) {
+                        runOnUiThread {
+                            Toast.makeText(context, "APK file unavailable", Toast.LENGTH_SHORT).show()
+                        }
+                        return@Thread
+                    }
+                    val filename = "CrossBarBD.apk"
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                            put(MediaStore.MediaColumns.MIME_TYPE, "application/vnd.android.package-archive")
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/CrossBarBD")
+                            put(MediaStore.MediaColumns.IS_PENDING, 1)
+                        }
+                        val resolver = context.contentResolver
+                        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                        if (uri != null) {
+                            resolver.openOutputStream(uri)?.use { outStream ->
+                                srcFile.inputStream().use { inStream ->
+                                    inStream.copyTo(outStream)
+                                }
+                            }
+                            contentValues.clear()
+                            contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                            resolver.update(uri, contentValues, null, null)
+                            runOnUiThread {
+                                Toast.makeText(context, "📥 APK saved to Downloads/CrossBarBD/$filename ✓", Toast.LENGTH_LONG).show()
+                            }
+                            return@Thread
+                        }
+                    }
+                    try {
+                        val dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        val dir = File(dl, "CrossBarBD").apply { if (!exists()) mkdirs() }
+                        val outFile = File(dir, filename)
+                        srcFile.inputStream().use { inStream ->
+                            FileOutputStream(outFile).use { outStream ->
+                                inStream.copyTo(outStream)
+                            }
+                        }
+                        runOnUiThread {
+                            Toast.makeText(context, "📥 APK saved: ${outFile.absolutePath} ✓", Toast.LENGTH_LONG).show()
+                        }
+                    } catch (e: Exception) {
+                        val fallbackDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.cacheDir
+                        val outFile = File(fallbackDir, filename)
+                        srcFile.inputStream().use { inStream ->
+                            FileOutputStream(outFile).use { outStream ->
+                                inStream.copyTo(outStream)
+                            }
+                        }
+                        runOnUiThread {
+                            Toast.makeText(context, "📥 APK saved: ${outFile.absolutePath} ✓", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(context, "APK export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
+        }
+
+        @JavascriptInterface
+        fun shareApk() {
+            Thread {
+                try {
+                    val srcFile = File(context.applicationInfo.sourceDir)
+                    if (!srcFile.exists()) {
+                        runOnUiThread {
+                            Toast.makeText(context, "APK file unavailable", Toast.LENGTH_SHORT).show()
+                        }
+                        return@Thread
+                    }
+                    val sharedDir = File(context.cacheDir, "shared")
+                    if (!sharedDir.exists()) sharedDir.mkdirs()
+                    val outFile = File(sharedDir, "CrossBarBD.apk")
+                    srcFile.inputStream().use { inStream ->
+                        FileOutputStream(outFile).use { outStream ->
+                            inStream.copyTo(outStream)
+                        }
+                    }
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        outFile
+                    )
+                    runOnUiThread {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/vnd.android.package-archive"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            putExtra(Intent.EXTRA_TEXT, "CrossBar BD Android App (APK)")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share CrossBar BD APK"))
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(context, "Share APK error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
         }
 
         @JavascriptInterface
