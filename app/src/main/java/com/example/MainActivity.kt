@@ -185,6 +185,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun getPreferredWaPackage(): String {
+        val prefs = getSharedPreferences("cbd_prefs", Context.MODE_PRIVATE)
+        return prefs.getString("wa_pkg", "com.whatsapp.w4b") ?: "com.whatsapp.w4b"
+    }
+
     private fun handleExternalLink(url: String): Boolean {
         if (url.startsWith("javascript:") || url.startsWith("about:")) {
             return false
@@ -193,21 +198,55 @@ class MainActivity : ComponentActivity() {
             url.startsWith("https://api.whatsapp.com/") ||
             url.startsWith("https://wa.me/")
         ) {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                    setPackage("com.whatsapp")
+            val parsed = Uri.parse(url)
+            val waSchemeUri: Uri = if (url.startsWith("https://api.whatsapp.com/") || url.startsWith("https://wa.me/")) {
+                val q = parsed.encodedQuery
+                val phoneSeg = parsed.pathSegments.firstOrNull()?.takeIf { it.all(Char::isDigit) }
+                when {
+                    !q.isNullOrEmpty() && !phoneSeg.isNullOrEmpty() && !q.contains("phone=") ->
+                        Uri.parse("whatsapp://send?phone=$phoneSeg&$q")
+                    !q.isNullOrEmpty() -> Uri.parse("whatsapp://send?$q")
+                    !phoneSeg.isNullOrEmpty() -> Uri.parse("whatsapp://send?phone=$phoneSeg")
+                    else -> parsed
                 }
-                startActivity(intent)
-                return true
-            } catch (e: Exception) {
-                // If WhatsApp app is not installed, open in browser
+            } else {
+                parsed
+            }
+
+            val prefPkg = getPreferredWaPackage()
+            val candidates = when (prefPkg) {
+                "com.whatsapp.w4b" -> listOf("com.whatsapp.w4b", "com.whatsapp")
+                "com.whatsapp" -> listOf("com.whatsapp", "com.whatsapp.w4b")
+                else -> emptyList()
+            }
+            for (pkg in candidates) {
+                val targetUris = if (waSchemeUri != parsed) listOf(waSchemeUri, parsed) else listOf(parsed)
+                for (targetUri in targetUris) {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, targetUri).apply {
+                            setPackage(pkg)
+                        }
+                        startActivity(intent)
+                        return true
+                    } catch (_: Exception) {
+                        // Try next URI or fallback package
+                    }
+                }
+            }
+            if (prefPkg.isEmpty()) {
                 try {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(browserIntent)
+                    val chooser = Intent.createChooser(Intent(Intent.ACTION_VIEW, waSchemeUri), "Send WhatsApp message via")
+                    startActivity(chooser)
                     return true
-                } catch (err: Exception) {
-                    Toast.makeText(this, "Cannot open WhatsApp link", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                    // Fallback to URL below
                 }
+            }
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, parsed))
+                return true
+            } catch (err: Exception) {
+                Toast.makeText(this, "Cannot open WhatsApp link", Toast.LENGTH_SHORT).show()
             }
         } else if (url.startsWith("tel:") || url.startsWith("mailto:")) {
             try {
@@ -232,7 +271,40 @@ class MainActivity : ComponentActivity() {
     inner class AndroidBridge(private val context: Context) {
 
         @JavascriptInterface
+        fun setPreferredWhatsApp(pkg: String) {
+            val cleanPkg = when (pkg) {
+                "com.whatsapp", "com.whatsapp.w4b", "" -> pkg
+                else -> "com.whatsapp.w4b"
+            }
+            context.getSharedPreferences("cbd_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putString("wa_pkg", cleanPkg)
+                .apply()
+        }
+
+        @JavascriptInterface
+        fun getPreferredWhatsApp(): String {
+            return getPreferredWaPackage()
+        }
+
+        @JavascriptInterface
+        fun getLogoDataUrl(): String {
+            return try {
+                context.assets.open("www/icons/icon-192.png").use { input ->
+                    val bytes = input.readBytes()
+                    "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+                }
+            } catch (_: Exception) {
+                ""
+            }
+        }
+
+        @JavascriptInterface
         fun saveImageToGallery(filename: String, base64Data: String) {
+            saveImageToGalleryInternal(filename, base64Data, showToastMsg = true)
+        }
+
+        private fun saveImageToGalleryInternal(filename: String, base64Data: String, showToastMsg: Boolean) {
             runOnUiThread {
                 try {
                     val bytes = Base64.decode(base64Data, Base64.DEFAULT)
@@ -254,7 +326,9 @@ class MainActivity : ComponentActivity() {
                             contentValues.clear()
                             contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
                             resolver.update(uri, contentValues, null, null)
-                            Toast.makeText(context, "🖼️ Invoice saved to Gallery / Photos: $safeName ✓", Toast.LENGTH_LONG).show()
+                            if (showToastMsg) {
+                                Toast.makeText(context, "🖼️ Invoice saved to Gallery / Photos: $safeName ✓", Toast.LENGTH_LONG).show()
+                            }
                         } else {
                             saveToAppExternalDir(safeName, bytes)
                         }
@@ -266,18 +340,21 @@ class MainActivity : ComponentActivity() {
                             val file = File(targetDir, safeName)
                             FileOutputStream(file).use { it.write(bytes) }
 
-                            // Scan file so gallery picks it up immediately
                             val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
                                 data = Uri.fromFile(file)
                             }
                             context.sendBroadcast(mediaScanIntent)
-                            Toast.makeText(context, "🖼️ Invoice saved to Gallery: $safeName ✓", Toast.LENGTH_LONG).show()
+                            if (showToastMsg) {
+                                Toast.makeText(context, "🖼️ Invoice saved to Gallery: $safeName ✓", Toast.LENGTH_LONG).show()
+                            }
                         } catch (e: Exception) {
                             saveToAppExternalDir(safeName, bytes)
                         }
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Gallery save failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    if (showToastMsg) {
+                        Toast.makeText(context, "Gallery save failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -333,6 +410,12 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface
         fun shareImage(filename: String, base64Data: String, textMessage: String, mimeType: String) {
+            shareImageToWhatsApp(filename, base64Data, textMessage, mimeType, "")
+        }
+
+        @JavascriptInterface
+        fun shareImageToWhatsApp(filename: String, base64Data: String, textMessage: String, mimeType: String, cleanPhone: String) {
+            saveImageToGalleryInternal(filename, base64Data, showToastMsg = false)
             runOnUiThread {
                 try {
                     val bytes = Base64.decode(base64Data, Base64.DEFAULT)
@@ -347,13 +430,44 @@ class MainActivity : ComponentActivity() {
                         file
                     )
 
+                    val prefPkg = getPreferredWaPackage()
+                    if (prefPkg.isNotEmpty()) {
+                        val directCandidates = if (prefPkg == "com.whatsapp.w4b") {
+                            listOf("com.whatsapp.w4b", "com.whatsapp")
+                        } else {
+                            listOf("com.whatsapp", "com.whatsapp.w4b")
+                        }
+                        for (pkg in directCandidates) {
+                            try {
+                                val waIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = mimeType
+                                    setPackage(pkg)
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    putExtra(Intent.EXTRA_TEXT, textMessage)
+                                    if (cleanPhone.isNotBlank()) {
+                                        putExtra("jid", "$cleanPhone@s.whatsapp.net")
+                                    }
+                                    clipData = ClipData.newRawUri("Invoice", uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                try {
+                                    context.grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                } catch (_: Exception) {}
+                                context.startActivity(waIntent)
+                                return@runOnUiThread
+                            } catch (_: Exception) {
+                                // Try fallback package or chooser
+                            }
+                        }
+                    }
+
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = mimeType
                         putExtra(Intent.EXTRA_STREAM, uri)
                         putExtra(Intent.EXTRA_TEXT, textMessage)
+                        clipData = ClipData.newRawUri("Invoice", uri)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-
                     context.startActivity(Intent.createChooser(intent, "Share Invoice via"))
                 } catch (e: Exception) {
                     Toast.makeText(context, "Share error: ${e.message}", Toast.LENGTH_SHORT).show()

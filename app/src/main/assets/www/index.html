@@ -519,7 +519,15 @@ const norm=()=>{
     r.startMonth=r.startMonth||today().slice(0,7);
   });
   S.pkg=S.pkg||{t:0,q:0};
-  S.biz=S.biz||{phone:""};
+  S.biz=S.biz||{phone:"01410890119",waPkg:"com.whatsapp.w4b"};
+  if(!S.biz.phone) S.biz.phone="01410890119";
+  if(S.biz.waPkg===undefined || S.biz.waPkg===null) S.biz.waPkg="com.whatsapp.w4b";
+  if(window.AndroidBridge && window.AndroidBridge.setPreferredWhatsApp && window._lastSyncedWaPkg!==S.biz.waPkg){
+    try{
+      window.AndroidBridge.setPreferredWhatsApp(S.biz.waPkg);
+      window._lastSyncedWaPkg=S.biz.waPkg;
+    }catch(e){}
+  }
   S.histImported=Boolean(S.histImported);
   S.refPct=S.refPct===undefined?10:Number(S.refPct);
   S.monthlyGoal=Number(S.monthlyGoal)||50000;
@@ -801,7 +809,11 @@ function save(){
 function upd(fn){fn();save();render()}
 function sure(b,fn){if(b.dataset.s){fn();return}b.dataset.s=1;const o=b.textContent;b.textContent="Sure?";setTimeout(()=>{delete b.dataset.s;b.textContent=o},3000)}
 
-function kindCh(){const k=KP[$("pk").value];$("pH").value=k[0];$("pF").value=k[1]}
+function kindCh(){
+  const k=KP[$("pk").value]||KP.Player;
+  if($("pH")) $("pH").value=k[0];
+  if($("pF")) $("pF").value=k[1];
+}
 function addProduct(){
   const n=$("pn").value.trim();if(!n)return toast("Enter product name");const v={};let pcs=0,inv=0;
   SL.forEach(sl=>{
@@ -837,7 +849,33 @@ function setV(id,sl,f,v){
 }
 function delP(id){upd(()=>S.products=S.products.filter(x=>x.id!=id))}
 function savePkg(){upd(()=>S.pkg={t:+$("pkT").value||0,q:+$("pkQ").value||0});toast("Packaging updated ✓")}
-function saveBiz(){upd(()=>S.biz={phone:$("bph").value.trim()});toast("Business info saved ✓")}
+function syncWaPreference(){
+  try{
+    const pkg=(S.biz&&S.biz.waPkg!==undefined)?S.biz.waPkg:"com.whatsapp.w4b";
+    if(window.AndroidBridge&&window.AndroidBridge.setPreferredWhatsApp){
+      window.AndroidBridge.setPreferredWhatsApp(pkg);
+      window._lastSyncedWaPkg=pkg;
+    }
+  }catch(e){}
+}
+function setWaPref(pkg){
+  upd(()=>{
+    S.biz=S.biz||{phone:"01410890119"};
+    S.biz.waPkg=pkg;
+  });
+  syncWaPreference();
+  toast(pkg=="com.whatsapp.w4b"?"WhatsApp Business selected ✓":pkg=="com.whatsapp"?"Personal WhatsApp selected ✓":"App chooser enabled ✓");
+}
+function saveBiz(){
+  upd(()=>{
+    S.biz={
+      phone:($("bph")?.value||"").trim()||"01410890119",
+      waPkg:$("bwa")?$("bwa").value:(S.biz?.waPkg??"com.whatsapp.w4b")
+    };
+  });
+  syncWaPreference();
+  toast("Business info saved ✓");
+}
 function areaCh(){
   const a=$("oa").value, def=a=="Dhaka"?80:140;
   $("odl").value=def;$("ocr").value=def;
@@ -1131,75 +1169,386 @@ async function saveFile(name,data,type){
   }
 }
 
-async function invoiceAsImage(id){
-  const o=S.orders.find(x=>x.id==id), cap=$("invCap");
-  if(typeof html2canvas==="undefined")return toast("Couldn't load image tool — check connection");
-  cap.innerHTML=`<style>#invCap{box-shadow:none;margin:0}${INV_CSS.replace(/\.sheet/g,"#invCap .sheet").replace(/\.hd/g,"#invCap .hd").replace(/\.brand/g,"#invCap .brand").replace(/\.inv-meta/g,"#invCap .inv-meta").replace(/\.info/g,"#invCap .info").replace(/\.sub/g,"#invCap .sub").replace(/\.c\{/g,"#invCap .c{").replace(/\.r\{/g,"#invCap .r{").replace(/\.totals/g,"#invCap .totals").replace(/\.ft/g,"#invCap .ft")}</style>`+invBody(o);
-  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
-  await new Promise(res=>setTimeout(res,120));
+function dataUrlToBlob(dataUrl){
+  const parts=dataUrl.split(","), mime=(parts[0].match(/:(.*?);/)||[])[1]||"image/png";
+  const bin=atob(parts[1]), len=bin.length, arr=new Uint8Array(len);
+  for(let i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
+let _cachedLogoImg=null;
+async function getInvoiceLogoImg(){
+  if(_cachedLogoImg) return _cachedLogoImg;
+  let dataUrl="";
   try{
-    const canvas=await html2canvas(cap.querySelector(".sheet"),{scale:2,backgroundColor:"#ffffff"});
-    canvas.toBlob(async blob=>{
-      if(!blob)return toast("Couldn't create invoice image");
-      const filename="invoice-"+o.name.replace(/[^a-z0-9]+/gi,"-")+"-"+o.date+".png";
-      const b64 = await blobToBase64(blob);
-      if(window.AndroidBridge && window.AndroidBridge.saveImageToGallery){
-        try{
-          window.AndroidBridge.saveImageToGallery(filename, b64);
-          toast("🖼️ Invoice saved to Phone Gallery! ✓");
-          return;
-        }catch(e){console.warn("saveImageToGallery failed:", e)}
+    if(window.AndroidBridge && window.AndroidBridge.getLogoDataUrl){
+      dataUrl=window.AndroidBridge.getLogoDataUrl()||"";
+    }
+  }catch(e){}
+  if(!dataUrl && location.protocol!=="file:"){
+    try{
+      const resp=await fetch("icons/icon-192.png");
+      if(resp.ok){
+        const blob=await resp.blob();
+        dataUrl="data:image/png;base64,"+await blobToBase64(blob);
       }
-      await saveFile(filename,blob,"image/png");
-      toast("Invoice saved ✓");
-    },"image/png");
+    }catch(e){}
+  }
+  if(!dataUrl) return null;
+  return await new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{_cachedLogoImg=img;res(img);};
+    img.onerror=()=>res(null);
+    img.src=dataUrl;
+  });
+}
+
+function wrapCanvasText(ctx, text, maxW){
+  const str=String(text||"").trim();
+  if(!str) return ["-"];
+  const lines=[];
+  str.split(/\r?\n/).forEach(para=>{
+    const words=para.split(/\s+/).filter(Boolean);
+    if(!words.length){ lines.push(""); return; }
+    let cur=words[0];
+    for(let i=1;i<words.length;i++){
+      const next=cur+" "+words[i];
+      if(ctx.measureText(next).width<=maxW){
+        cur=next;
+      }else{
+        lines.push(cur);
+        cur=words[i];
+      }
+    }
+    while(ctx.measureText(cur).width>maxW && cur.length>4){
+      let k=cur.length-1;
+      while(k>1 && ctx.measureText(cur.slice(0,k)).width>maxW) k--;
+      lines.push(cur.slice(0,k));
+      cur=cur.slice(k);
+    }
+    lines.push(cur);
+  });
+  return lines;
+}
+
+async function generateInvoicePng(o){
+  const W=1240, PAD=64, INNER=W-PAD*2;
+  const logoImg=await getInvoiceLogoImg();
+  const mCan=document.createElement("canvas");
+  mCan.width=W; mCan.height=100;
+  const mCtx=mCan.getContext("2d");
+
+  const items=Array.isArray(o.items)?o.items:[];
+  mCtx.font="600 20px sans-serif";
+  const itemRows=items.map(it=>{
+    const nameLines=wrapCanvasText(mCtx, it.name||"Jersey", 560);
+    const subLine=(it.slv||"Half")+" sleeve"+(it.size?" · Size "+it.size:"");
+    const rowH=Math.max(76, nameLines.length*28 + 38);
+    return {it, nameLines, subLine, rowH};
+  });
+
+  mCtx.font="19px sans-serif";
+  const addrLines=wrapCanvasText(mCtx, o.addr||o.area||"-", 480);
+  mCtx.font="18px sans-serif";
+  const noteLines=o.notes?wrapCanvasText(mCtx, "Note: "+o.notes, INNER-36):[];
+
+  const headerH=195;
+  const infoH=Math.max(125, addrLines.length*26+72);
+  const tableHeadH=52;
+  const rowsH=itemRows.reduce((s,r)=>s+r.rowH,0) || 70;
+  const noteH=noteLines.length ? (noteLines.length*26 + 34) : 0;
+  const subTotal=items.reduce((a,i)=>a+(Number(i.qty)||0)*(Number(i.price)||0),0);
+  let totLinesCount=4; // subtotal, delivery, grand total, paid
+  if(o.discount>0) totLinesCount++;
+  if(dueOf(o)>0) totLinesCount++;
+  const totalsH=totLinesCount*36 + 54;
+  const footerH=82;
+  const H=Math.max(780, headerH + infoH + tableHeadH + rowsH + noteH + totalsH + footerH + 40);
+
+  const canvas=document.createElement("canvas");
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext("2d");
+
+  // White background
+  ctx.fillStyle="#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  // Subtle top accent strip
+  ctx.fillStyle="#10b981";
+  ctx.fillRect(0,0,W,10);
+
+  // Logo badge
+  const lx=PAD+48, ly=84, lr=46;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(lx,ly,lr,0,Math.PI*2);
+  ctx.closePath();
+  ctx.fillStyle="#0a0f1e";
+  ctx.fill();
+  ctx.clip();
+  let drewLogo=false;
+  if(logoImg){
+    try{
+      ctx.drawImage(logoImg, lx-lr, ly-lr, lr*2, lr*2);
+      drewLogo=true;
+    }catch(e){}
+  }
+  if(!drewLogo){
+    ctx.strokeStyle="#ffffff";
+    ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(lx,ly,lr-6,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle="#ffffff";
+    ctx.font="800 15px sans-serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText("CROSSBAR",lx,ly-8);
+    ctx.fillText("BD",lx,ly+12);
+  }
+  ctx.restore();
+
+  // Brand title
+  ctx.textAlign="left";
+  ctx.textBaseline="alphabetic";
+  ctx.fillStyle="#0f172a";
+  ctx.font="800 40px sans-serif";
+  ctx.fillText("CrossBar BD", PAD+114, 82);
+  ctx.fillStyle="#64748b";
+  ctx.font="600 14px sans-serif";
+  ctx.fillText("WEAR THE PASSION. LIVE THE GAME.", PAD+116, 110);
+
+  // Right Invoice meta
+  const bizPhone=(S.biz&&S.biz.phone)?S.biz.phone:"01410890119";
+  ctx.textAlign="right";
+  ctx.fillStyle="#0f172a";
+  ctx.font="800 30px sans-serif";
+  ctx.fillText("INVOICE", W-PAD, 74);
+  ctx.fillStyle="#475569";
+  ctx.font="500 18px sans-serif";
+  ctx.fillText("Date: "+(o.date||today()), W-PAD, 102);
+  ctx.fillStyle="#0f172a";
+  ctx.font="600 18px sans-serif";
+  ctx.fillText("Hotline / WhatsApp: "+bizPhone, W-PAD, 128);
+
+  // Status badge pill
+  const stText=String(o.status||"Confirmed");
+  const stColors={
+    "Pre-order":{bg:"#fef9c3",fg:"#854d0e"},
+    "Confirmed":{bg:"#dcfce7",fg:"#15803d"},
+    "Delivered":{bg:"#dbeafe",fg:"#1d4ed8"},
+    "Cancelled":{bg:"#f1f5f9",fg:"#475569"}
+  }[stText]||{bg:"#f1f5f9",fg:"#334155"};
+  ctx.font="700 15px sans-serif";
+  const pillW=Math.max(106, ctx.measureText(stText).width+28);
+  const pillX=W-PAD-pillW, pillY=138;
+  ctx.fillStyle=stColors.bg;
+  ctx.fillRect(pillX, pillY, pillW, 28);
+  ctx.fillStyle=stColors.fg;
+  ctx.textAlign="center";
+  ctx.fillText(stText, pillX+pillW/2, pillY+19);
+
+  // Header bottom divider
+  let y=184;
+  ctx.fillStyle="#0f172a";
+  ctx.fillRect(PAD, y, INNER, 3);
+  y+=34;
+
+  // Bill To & Ship To
+  ctx.textAlign="left";
+  ctx.fillStyle="#64748b";
+  ctx.font="700 14px sans-serif";
+  ctx.fillText("BILL TO", PAD, y);
+  ctx.fillStyle="#0f172a";
+  ctx.font="700 24px sans-serif";
+  const billName=wrapCanvasText(ctx, o.name||"Customer", 520);
+  ctx.fillText(billName[0]||"Customer", PAD, y+30);
+  ctx.fillStyle="#334155";
+  ctx.font="500 19px sans-serif";
+  ctx.fillText(o.phone||"-", PAD, y+58);
+
+  ctx.textAlign="right";
+  ctx.fillStyle="#64748b";
+  ctx.font="700 14px sans-serif";
+  ctx.fillText("SHIP TO", W-PAD, y);
+  ctx.fillStyle="#0f172a";
+  ctx.font="600 19px sans-serif";
+  let ay=y+28;
+  addrLines.forEach(ln=>{
+    ctx.fillText(ln, W-PAD, ay);
+    ay+=25;
+  });
+  ctx.fillStyle="#475569";
+  ctx.font="500 17px sans-serif";
+  ctx.fillText((o.area||"Dhaka")+(o.pay?" · "+o.pay:""), W-PAD, ay+2);
+
+  y+=infoH;
+
+  // Table header
+  ctx.fillStyle="#f1f5f9";
+  ctx.fillRect(PAD, y, INNER, tableHeadH);
+  ctx.fillStyle="#cbd5e1";
+  ctx.fillRect(PAD, y+tableHeadH-2, INNER, 2);
+
+  ctx.fillStyle="#475569";
+  ctx.font="700 15px sans-serif";
+  ctx.textAlign="left";
+  ctx.fillText("ITEM", PAD+16, y+32);
+  ctx.textAlign="center";
+  ctx.fillText("QTY", PAD+730, y+32);
+  ctx.textAlign="right";
+  ctx.fillText("PRICE", PAD+930, y+32);
+  ctx.fillText("AMOUNT", W-PAD-16, y+32);
+  y+=tableHeadH;
+
+  // Table rows
+  itemRows.forEach((r, idx)=>{
+    if(idx%2===1){
+      ctx.fillStyle="#fafafa";
+      ctx.fillRect(PAD, y, INNER, r.rowH);
+    }
+    ctx.textAlign="left";
+    ctx.fillStyle="#0f172a";
+    ctx.font="700 20px sans-serif";
+    let ty=y+30;
+    r.nameLines.forEach(ln=>{
+      ctx.fillText(ln, PAD+16, ty);
+      ty+=28;
+    });
+    ctx.fillStyle="#64748b";
+    ctx.font="500 16px sans-serif";
+    ctx.fillText(r.subLine, PAD+16, ty);
+
+    ctx.fillStyle="#0f172a";
+    ctx.font="600 20px sans-serif";
+    ctx.textAlign="center";
+    ctx.fillText(String(r.it.qty||1), PAD+730, y+36);
+    ctx.textAlign="right";
+    ctx.fillText(tk(r.it.price||0), PAD+930, y+36);
+    ctx.font="700 20px sans-serif";
+    ctx.fillText(tk((r.it.price||0)*(r.it.qty||1)), W-PAD-16, y+36);
+
+    y+=r.rowH;
+    ctx.fillStyle="#e2e8f0";
+    ctx.fillRect(PAD, y-1, INNER, 1);
+  });
+
+  // Notes strip
+  if(noteLines.length){
+    y+=16;
+    const nBoxH=noteLines.length*26+20;
+    ctx.fillStyle="#f8fafc";
+    ctx.fillRect(PAD, y, INNER, nBoxH);
+    ctx.fillStyle="#10b981";
+    ctx.fillRect(PAD, y, 6, nBoxH);
+    ctx.textAlign="left";
+    ctx.fillStyle="#334155";
+    ctx.font="italic 18px sans-serif";
+    let ny=y+28;
+    noteLines.forEach(ln=>{
+      ctx.fillText(ln, PAD+20, ny);
+      ny+=26;
+    });
+    y+=nBoxH;
+  }
+
+  // Totals right block
+  y+=28;
+  const txL=W-PAD-460, txR=W-PAD-8;
+  const drawTotRow=(lbl, val, color="#334155", font="500 19px sans-serif")=>{
+    ctx.font=font;
+    ctx.fillStyle=color;
+    ctx.textAlign="left";
+    ctx.fillText(lbl, txL, y);
+    ctx.textAlign="right";
+    ctx.fillText(val, txR, y);
+    y+=34;
+  };
+  drawTotRow("Subtotal", tk(subTotal));
+  drawTotRow("Delivery Charge", o.delivery?tk(o.delivery):"Free");
+  if(o.discount>0){
+    drawTotRow("Discount"+(o.ref?" ("+o.ref+")":""), "-"+tk(o.discount), "#dc2626");
+  }
+  ctx.fillStyle="#0f172a";
+  ctx.fillRect(txL, y-14, txR-txL, 2.5);
+  y+=18;
+  drawTotRow("Total", tk(total(o)), "#0f172a", "800 28px sans-serif");
+  y+=4;
+  drawTotRow("Paid", tk(o.paid||0), "#16a34a", "700 20px sans-serif");
+  if(dueOf(o)>0){
+    drawTotRow("Amount Due", tk(dueOf(o)), "#dc2626", "700 22px sans-serif");
+  }
+
+  // Bottom footer pinned cleanly near bottom
+  const fy=H-52;
+  ctx.fillStyle="#e2e8f0";
+  ctx.fillRect(PAD, fy-28, INNER, 1.5);
+  ctx.textAlign="left";
+  ctx.fillStyle="#16a34a";
+  ctx.font="700 18px sans-serif";
+  ctx.fillText("Thank you for shopping with CrossBar BD!", PAD, fy);
+  ctx.textAlign="right";
+  ctx.fillStyle="#64748b";
+  ctx.font="500 17px sans-serif";
+  ctx.fillText("Need help? WhatsApp / Call "+bizPhone, W-PAD, fy);
+
+  const dataUrl=canvas.toDataURL("image/png");
+  const base64=dataUrl.split(",")[1];
+  const blob=dataUrlToBlob(dataUrl);
+  return {blob, base64, dataUrl};
+}
+
+async function invoiceAsImage(id){
+  const o=S.orders.find(x=>x.id==id);
+  if(!o) return toast("Order not found");
+  try{
+    const {blob, base64}=await generateInvoicePng(o);
+    const filename="invoice-"+(o.name||"customer").replace(/[^a-z0-9]+/gi,"-")+"-"+(o.date||today())+".png";
+    if(window.AndroidBridge && window.AndroidBridge.saveImageToGallery){
+      window.AndroidBridge.saveImageToGallery(filename, base64);
+      return;
+    }
+    await saveFile(filename,blob,"image/png");
+    toast("Invoice saved ✓");
   }catch(e){
+    console.error("Invoice generation failed:", e);
     toast("Couldn't generate invoice image");
-  }finally{
-    cap.innerHTML="";
   }
 }
 
 async function shareInvoice(id){
-  const o=S.orders.find(x=>x.id==id), cap=$("invCap");
-  if(typeof html2canvas==="undefined")return toast("Couldn't load image tool");
-  cap.innerHTML=`<style>#invCap{box-shadow:none;margin:0}${INV_CSS.replace(/\.sheet/g,"#invCap .sheet").replace(/\.hd/g,"#invCap .hd").replace(/\.brand/g,"#invCap .brand").replace(/\.inv-meta/g,"#invCap .inv-meta").replace(/\.info/g,"#invCap .info").replace(/\.sub/g,"#invCap .sub").replace(/\.c\{/g,"#invCap .c{").replace(/\.r\{/g,"#invCap .r{").replace(/\.totals/g,"#invCap .totals").replace(/\.ft/g,"#invCap .ft")}</style>`+invBody(o);
-  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
-  await new Promise(res=>setTimeout(res,120));
+  const o=S.orders.find(x=>x.id==id);
+  if(!o) return toast("Order not found");
   try{
-    const canvas=await html2canvas(cap.querySelector(".sheet"),{scale:2,backgroundColor:"#ffffff"});
-    canvas.toBlob(async blob=>{
-      if(!blob)return toast("Couldn't create invoice image");
-      const filename="invoice-"+o.name.replace(/[^a-z0-9]+/gi,"-")+".png";
-      const msg=confirmMsg(o);
+    const {blob, base64}=await generateInvoicePng(o);
+    const filename="invoice-"+(o.name||"customer").replace(/[^a-z0-9]+/gi,"-")+"-"+(o.date||today())+".png";
+    const msg=confirmMsg(o);
+    const cleanPhone=waPhone(o.phone);
 
-      if(window.AndroidBridge){
-        try{
-          const b64 = await blobToBase64(blob);
-          if(window.AndroidBridge.saveImageToGallery){
-            window.AndroidBridge.saveImageToGallery(filename, b64);
-          }
-          if(window.AndroidBridge.shareImage){
-            window.AndroidBridge.shareImage(filename, b64, msg, "image/png");
-            return;
-          }
-        }catch(e){console.warn("AndroidBridge share failed:", e)}
+    if(window.AndroidBridge){
+      if(window.AndroidBridge.shareImageToWhatsApp){
+        window.AndroidBridge.shareImageToWhatsApp(filename, base64, msg, "image/png", cleanPhone);
+        return;
       }
+      if(window.AndroidBridge.saveImageToGallery){
+        window.AndroidBridge.saveImageToGallery(filename, base64);
+      }
+      if(window.AndroidBridge.shareImage){
+        window.AndroidBridge.shareImage(filename, base64, msg, "image/png");
+        return;
+      }
+    }
 
-      const file=new File([blob],filename,{type:"image/png"});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        try{
-          await navigator.share({files:[file],text:msg,title:"CrossBar BD Invoice"});
-          return;
-        }catch(e){if(e&&e.name==="AbortError")return}
-      }
-      await saveFile(filename,blob,"image/png");
-      toast("Invoice saved to Gallery — attach it in WhatsApp");
-    },"image/png");
+    const file=new File([blob],filename,{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],text:msg,title:"CrossBar BD Invoice"});
+        return;
+      }catch(e){if(e&&e.name==="AbortError")return}
+    }
+    await saveFile(filename,blob,"image/png");
+    toast("Invoice saved — attach it in WhatsApp");
   }catch(e){
+    console.error("Share invoice failed:", e);
     toast("Couldn't generate invoice image");
-  }finally{
-    cap.innerHTML="";
   }
 }
 
@@ -1262,7 +1611,7 @@ function tg(id){so.has(id)?so.delete(id):so.add(id);$("slist").innerHTML=stkList
 
 const pcard=p=>{
   const o=so.has(p.id);
-  return`<div class="card"><div class="row" style="border:0;padding:0;cursor:pointer" onclick="tg('${p.id}')">${p.img?`<img src="${p.img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none;margin-right:8px">`:""}<span><b>${esc(p.name)}</b> <span class="tag">${p.team||"team ?"}</span><br><span class="sm">${tot(p)} pcs · ${sumS(p)}</span></span><span>${o?"▲":"▼"}</span></div>${o?`<div style="margin-top:8px;display:flex;gap:10px;align-items:center">${p.img?`<img src="${p.img}" style="width:64px;height:64px;border-radius:10px;object-fit:cover">`:'<div class="sm">No photo yet</div>'}<div style="flex:1"><input type="file" accept="image/*" id="img${p.id}" style="display:none" onchange="setImg('${p.id}',this)"><button class="s" onclick="document.getElementById('img${p.id}').click()">📷 ${p.img?"Change":"Add"} Photo</button>${p.img?` <button class="d xs" onclick="sure(this,()=>setP('${p.id}','img',''))">Remove</button>`:""}</div></div><div class="grid" style="margin-top:8px"><div><div class="k">Category</div><select onchange="setP('${p.id}','team',this.value)"><option value=""${p.team?"":" selected"} disabled>Select</option><option${p.team=="National"?" selected":""}>National</option><option${p.team=="Club"?" selected":""}>Club</option></select></div><div><div class="k">Product Name</div><input value="${esc(p.name)}" onchange="setP('${p.id}','name',this.value)"></div></div><div class="grid" style="margin-top:6px"><div><div class="k">Freight / pc</div><input type="number" value="${Math.round(p.vara*100)/100}" onchange="setP('${p.id}','vara',this.value)"></div><div><div class="k">Total Investment (Cost + Freight)</div><input type="number" value="${Math.round(p.inv)}" onchange="setP('${p.id}','inv',this.value)"></div></div>${SL.map(sl=>vblock(p,sl)).join("")}<button class="d" style="width:100%;margin-top:8px" onclick="sure(this,()=>delP('${p.id}'))">× Delete this jersey</button>`:""}</div>`;
+  return`<div class="card"><div class="row" style="border:0;padding:0;cursor:pointer" onclick="tg('${p.id}')">${p.img?`<img src="${p.img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none;margin-right:8px">`:""}<span><b>${esc(p.name)}</b> <span class="tag">${p.team||"team ?"}</span>${p.kind?` <span class="tag" style="font-size:10px">${esc(p.kind)}</span>`:""}<br><span class="sm">${tot(p)} pcs · ${sumS(p)}</span></span><span>${o?"▲":"▼"}</span></div>${o?`<div style="margin-top:8px;display:flex;gap:10px;align-items:center">${p.img?`<img src="${p.img}" style="width:64px;height:64px;border-radius:10px;object-fit:cover">`:'<div class="sm">No photo yet</div>'}<div style="flex:1"><input type="file" accept="image/*" id="img${p.id}" style="display:none" onchange="setImg('${p.id}',this)"><button class="s" onclick="document.getElementById('img${p.id}').click()">📷 ${p.img?"Change":"Add"} Photo</button>${p.img?` <button class="d xs" onclick="sure(this,()=>setP('${p.id}','img',''))">Remove</button>`:""}</div></div><div class="grid" style="margin-top:8px"><select onchange="setP('${p.id}','team',this.value)"><option value=""${p.team?"":" selected"} disabled>Select</option><option${p.team=="National"?" selected":""}>National</option><option${p.team=="Club"?" selected":""}>Club</option></select><input value="${esc(p.name)}" onchange="setP('${p.id}','name',this.value)"></div><div class="grid" style="margin-top:6px"><div><div class="k">Freight / pc</div><input type="number" value="${Math.round(p.vara*100)/100}" onchange="setP('${p.id}','vara',this.value)"></div><div><div class="k">Total Investment (Cost + Freight)</div><input type="number" value="${Math.round(p.inv)}" onchange="setP('${p.id}','inv',this.value)"></div></div>${SL.map(sl=>vblock(p,sl)).join("")}<button class="d" style="width:100%;margin-top:8px" onclick="sure(this,()=>delP('${p.id}'))">× Delete this jersey</button>`:""}</div>`;
 };
 
 function setImg(id,inp){
@@ -1467,6 +1816,14 @@ function render(){
     const activeTemplate = getBulkTemplateText();
 
     h=`<div class="card"><div class="k">Total Customers</div><div class="v">${L.length}</div></div>
+<div class="card" style="padding:9px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+  <div style="font-size:12.5px"><b>📲 Business WhatsApp:</b> <span class="pos">${esc(S.biz?.phone||"01410890119")}</span></div>
+  <select onchange="setWaPref(this.value)" style="width:auto;padding:5px 8px;font-size:12px">
+    <option value="com.whatsapp.w4b"${(S.biz?.waPkg??"com.whatsapp.w4b")=="com.whatsapp.w4b"?" selected":""}>WhatsApp Business (Default)</option>
+    <option value="com.whatsapp"${S.biz?.waPkg=="com.whatsapp"?" selected":""}>Personal WhatsApp</option>
+    <option value=""${S.biz?.waPkg===""?" selected":""}>Ask Every Time</option>
+  </select>
+</div>
 
 <!-- Bulk WhatsApp Messaging Card -->
 <details class="card" ${selectedCustPhones.size > 0 ? "open" : ""} style="border-color:var(--a);background:linear-gradient(180deg,var(--c),rgba(22,163,74,0.03))">
@@ -1656,8 +2013,8 @@ function render(){
         </div>
       </div>`;
 
-    h=`<details class="card"><summary style="cursor:pointer"><b>🏪 Business Info</b></summary><div class="sm" style="margin:6px 0 4px">Shown on invoices so customers can call you.</div><input id="bph" value="${esc(S.biz.phone)}" placeholder="e.g. 01712345678"><button style="margin-top:6px" onclick="saveBiz()">Save</button></details><details class="card"><summary style="cursor:pointer"><b>📦 Packaging Cost</b></summary><div class="grid" style="margin:6px 0"><div><div class="k">Total Amount</div><input id="pkT" type="number" value="${S.pkg.t||""}" placeholder="300"></div><div><div class="k">Packets Bought</div><input id="pkQ" type="number" value="${S.pkg.q||""}" placeholder="50"></div></div><button onclick="savePkg()">Save</button><div class="sm" style="margin-top:6px">Packaging per unit: <b>${tk(pk())}</b></div></details><details class="card"><summary style="cursor:pointer"><b>➕ Add New Product (Batch)</b></summary><div class="f" style="margin-top:8px"><select id="ptm"><option>National</option><option>Club</option></select><input id="pn" placeholder="Jersey name (e.g. Barcelona Home Kit)"><select id="pk" onchange="kindCh()">${Object.keys(KP).map(k=>`<option>${k}</option>`).join("")}</select><div><div class="k">Pura batch-er mot vara/import khoroj (taka)</div><input id="pv" type="number" placeholder="200"></div>
-${SL.map(sl=>{const c=sl[0];return`<div class="hl"><b>${sl} sleeve</b><div class="grid" style="margin:6px 0"><div><div class="k">Buying Price / pc</div><input id="c${c}" type="number" value="${sl=="Half"?780:950}"></div><div><div class="k">Selling Price</div><input id="p${c}" type="number" value="${KP.Player[sl=="Half"?0:1]}"></div></div><div class="grid5">${SZ.map(z=>`<div><div class="k">${z}</div><input id="s${c}${z}" type="number" min="0" placeholder="0"></div>`).join("")}</div></div>`}).join("")}</div><button onclick="addProduct()">+ Add Product</button></details>${loadBanner}${lowStockSection}<div style="position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0"><input id="stq" placeholder="🔍 Search (e.g. Barcelona, Argentina)" value="${esc(stq)}" oninput="stq=this.value;$('slist').innerHTML=stkList()"><div style="display:flex;gap:6px;margin-top:6px">${[["all","All ("+S.products.length+")"],["National","National ("+cn("National")+")"],["Club","Club ("+cn("Club")+")"]].map(([k,l])=>`<button class="s" style="flex:1;${stf==k?"background:var(--a);color:#fff":""}" onclick="stf='${k}';render()">${l}</button>`).join("")}</div></div><div id="slist">${stkList()}</div>`;
+    h=`<details class="card"><summary style="cursor:pointer"><b>🏪 Business Info & WhatsApp</b></summary><div class="sm" style="margin:6px 0 4px">Hotline shown on invoices & preferred WhatsApp account for sending messages:</div><div class="k">Business WhatsApp / Hotline</div><input id="bph" value="${esc(S.biz.phone)}" placeholder="e.g. 01410890119"><div class="k" style="margin-top:6px">Send Messages Using</div><select id="bwa"><option value="com.whatsapp.w4b"${(S.biz?.waPkg??"com.whatsapp.w4b")=="com.whatsapp.w4b"?" selected":""}>WhatsApp Business (01410890119)</option><option value="com.whatsapp"${S.biz?.waPkg=="com.whatsapp"?" selected":""}>Personal WhatsApp</option><option value=""${S.biz?.waPkg===""?" selected":""}>Ask Every Time</option></select><button style="margin-top:8px" onclick="saveBiz()">Save</button></details><details class="card"><summary style="cursor:pointer"><b>📦 Packaging Cost</b></summary><div class="grid" style="margin:6px 0"><div><div class="k">Total Amount</div><input id="pkT" type="number" value="${S.pkg.t||""}" placeholder="300"></div><div><div class="k">Packets Bought</div><input id="pkQ" type="number" value="${S.pkg.q||""}" placeholder="50"></div></div><button onclick="savePkg()">Save</button><div class="sm" style="margin-top:6px">Packaging per unit: <b>${tk(pk())}</b></div></details><details class="card"><summary style="cursor:pointer"><b>➕ Add New Product (Batch)</b></summary><div class="f" style="margin-top:8px"><div class="grid"><select id="ptm"><option>National</option><option>Club</option></select><select id="pk" onchange="kindCh()">${Object.keys(KP).map(k=>`<option>${k}</option>`).join("")}</select></div><input id="pn" placeholder="Jersey name (e.g. Barcelona Home)"><div><div class="k">Pura batch-er mot vara/import khoroj (taka)</div><input id="pv" type="number" placeholder="200"></div>
+${SL.map(sl=>{const c=sl[0];return`<div class="hl"><b>${sl} sleeve</b><div class="grid" style="margin:6px 0"><div><div class="k">Buying Price / pc</div><input id="c${c}" type="number" value="${sl=="Half"?780:950}"></div><div><div class="k">Selling Price</div><input id="p${c}" type="number" value="${KP.Player[sl=="Half"?0:1]}"></div></div><div class="grid5">${SZ.map(z=>`<div><div class="k">${z}</div><input id="s${c}${z}" type="number" min="0" placeholder="0"></div>`).join("")}</div></div>`}).join("")}</div><button onclick="addProduct()">+ Add Product</button></details>${loadBanner}${lowStockSection}<div style="position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0"><input id="stq" placeholder="🔍 Search (e.g. Barcelona, Argentina)" value="${esc(stq)}" oninput="stq=this.value;$('slist').innerHTML=stkList()"><div style="display:flex;gap:5px;margin-top:6px">${[["all","All ("+S.products.length+")"],["National","National ("+cn("National")+")"],["Club","Club ("+cn("Club")+")"]].map(([k,l])=>`<button class="s" style="flex:1;padding:6px 4px;font-size:12px;${stf==k?"background:var(--a);color:#fff":""}" onclick="stf='${k}';render()">${l}</button>`).join("")}</div></div><div id="slist">${stkList()}</div>`;
   }
   if(tab=="ord"){
     const cn=S.orders.filter(o=>o.status=="Cancelled").length;
